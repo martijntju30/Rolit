@@ -141,7 +141,7 @@ public class Game extends Observable {
 		// E{Spel}
 		update();
 		while (!board.gameOver()) {
-			players[current].makeMove(board);
+			players[current].makeMove(board, this);
 			nextPlayer();
 			update();
 		}
@@ -209,22 +209,21 @@ public class Game extends Observable {
 	}
 
 	private void applyRules(int zet) {
-		Set<Integer> toChange = Validatie.getPossibleTakeOvers(zet, board, this);
+		Set<Integer> toChange = Validatie.getPossibleTakeOvers(zet, board, getCurrentPlayer());
 
 		// Wijzig nu alle vakjes die in toChange staan
 		for (Integer i: toChange){
-		board.setField(i, getCurrentPlayer().getBall());
+			board.setField(i, getCurrentPlayer().getBall());
 		}
 	}
 
 	public void takeTurn(int i) {
 		int choice = i;
 		boolean valid = board.isField(choice) && board.isEmptyField(choice)
-				&& Validatie.validMove(choice, board, this);
+				&& Validatie.validMove(choice, board, getCurrentPlayer());
 		if (!valid) {
-			System.out.println("WROONNNGGGGG");
 			view.label
-					.setText("This field is already taken. Please try again \nIt's "
+					.setText("This is not a valid move. Please try again \nIt's "
 							+ getCurrentPlayer().getName()
 							+ "'s ("
 							+ getCurrentPlayer().getBall() + ") turn.");

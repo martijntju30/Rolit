@@ -10,6 +10,9 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import project.RolitConstants;
+import project.RolitControl;
+
 /**
  * P2 prac wk4. <br>
  * Client.
@@ -28,7 +31,7 @@ public class Client extends Thread {
 	/**
 	 * Constructs a Client-object and tries to make a socket connection
 	 */
-	public Client(String name, InetAddress host, int port, MessageUI muiArg)
+	public Client(String name, int aantalSpelers, InetAddress host, int port, MessageUI muiArg)
 			throws IOException {
 		// Set the Message UI
 		this.mui = muiArg;
@@ -40,7 +43,8 @@ public class Client extends Thread {
 					new InputStreamReader(sock.getInputStream()));
 			out = new BufferedWriter(new OutputStreamWriter(
 					sock.getOutputStream()));
-			out.write(name+"\n");
+			System.out.println("write(RolitControl.speelSpel+name+aantalSpelers"+(RolitControl.speelSpel+RolitConstants.msgDelim+name+RolitConstants.msgDelim+aantalSpelers+"\n"));
+			out.write(RolitControl.speelSpel+RolitConstants.msgDelim+name+RolitConstants.msgDelim+aantalSpelers+"\n");
 			out.flush();
 		} catch (IOException e) {
 			mui.addMessage("ERROR: could not create a socket on " + host
@@ -72,19 +76,23 @@ public class Client extends Thread {
 	private String applyFilter(String line) {
 		String[] parts = line.split(" ");
 		String command = parts[0];
-		for (int i = 0; i<Server.commandslist.length; i++){
-			if (command.equals(Server.commandslist[i])){
-				return null;
+		if (command.equals(RolitControl.nieuwChatbericht)){
+			String zin = "";
+			for (int i=1; i<parts.length; i++){
+				zin = zin + " " + parts[i];
 			}
+			return zin;
 		}
-		return line;
+		else {
+			return null;
+		}
 	}
 
 	/** send a message to a ClientHandler. */
 	public void sendMessage(String msg) {
 		try {
 			System.out.println("Try to send message: "+msg);
-			out.write(msg + "\n");
+			out.write(RolitControl.nieuwChatbericht+RolitConstants.msgDelim+msg + "\n");
 			out.flush();
 		} catch (IOException e) {
 			mui.addMessage("ERROR: could not send message: "+msg+". Please try again!");

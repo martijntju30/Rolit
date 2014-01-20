@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class Validatie {
 
-	public static boolean validMove(int zet, Board board, Game game) {
+	public static boolean validMove(int zet, Board board, Player player) {
 		boolean valid = false;
 		// Een move is pas valid als hij grenst aan een andere bal
 		int[] indexes = new int[8];
@@ -35,19 +35,19 @@ public class Validatie {
 		boolean blockable = false;
 		for (Integer i : freeIndexes) {
 			Board boardCopy = board.deepCopy();
-			boardCopy.setField(i, game.getCurrentPlayer().getBall());
-			if (getPossibleTakeOvers(i, board, game).size() > 0) {
+			boardCopy.setField(i, player.getBall());
+			if (getPossibleTakeOvers(i, board, player).size() > 0) {
 				System.out
 						.println("De speler kan anderen blokkeren, dit moet hij dus ook doen. Dit kan met de zet "
 								+ i
 								+ ". Dit blokkeert: "
-								+ getPossibleTakeOvers(i, board, game));
+								+ getPossibleTakeOvers(i, board, player));
 				blockable = true;
 			}
 		}
 		// Kijk nu of de move iets blockt. Als beide ja is, dan is de move
 		// valid.
-		allowed = (getPossibleTakeOvers(zet, board, game).size() > 0 == blockable);
+		allowed = (getPossibleTakeOvers(zet, board, player).size() > 0 == blockable);
 		System.out.println("Als je de zet " + zet + " doet, dan is dit valid:"
 				+ valid + " en blockable: " + blockable + " en allowed: "
 				+ allowed);
@@ -66,12 +66,12 @@ public class Validatie {
 		return resultList;
 	}
 
-	public static Set<Integer> getPossibleTakeOvers(int zet, Board board, Game game) {
+	public static Set<Integer> getPossibleTakeOvers(int zet, Board board, Player player) {
 		HashSet<Integer> result = new HashSet<Integer>();
 		for (int i = -1; i < 2; i++) {
 			for (int j = -1; j < 2; j++) {
 				System.out.println("Kijk naar ("+i+","+j+")");
-				Set<Integer> takeOvers = getTakeOvers(zet, board, game, i, j);
+				Set<Integer> takeOvers = getTakeOvers(zet, board, player, i, j);
 				if (takeOvers != null && takeOvers.size() > 0) {
 					result.addAll(takeOvers);
 				}
@@ -80,9 +80,9 @@ public class Validatie {
 		return result;
 	}
 
-	public static Set<Integer> getTakeOvers(int zet, Board board, Game game, int plusRow, int plusCol) {
+	public static Set<Integer> getTakeOvers(int zet, Board board, Player player, int plusRow, int plusCol) {
 		Set<Integer> toChange = new HashSet<Integer>();
-		Ball playermark = game.getCurrentPlayer().getBall();
+		Ball playermark = player.getBall();
 		int r = board.getRow(zet) + plusRow;
 		int c = board.getCol(zet) + plusCol;
 		while (board.isField(r, c) && !board.isEmptyField(r, c)) {

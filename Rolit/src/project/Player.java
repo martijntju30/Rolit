@@ -114,8 +114,8 @@ public class Player {
      * @param bord
      *            the current board
      */
-    public void makeMove(Board board) {
+    public void makeMove(Board board, Game game) {
         int keuze = determineMove(board);
-        board.setField(keuze, getBall());
+        game.takeTurn(keuze);
     }
 }

@@ -271,16 +271,38 @@ public class Board {
 		if (isFull()) {
 			// Tel eerst hoeveel ballen iedere speler heeft.
 			int balls_yellow = countBalls(Ball.YELLOW);
+			System.out.println("yellow: "+balls_yellow);
 			int balls_blue = countBalls(Ball.BLUE);
+			System.out.println("blue: "+balls_blue);
 			int balls_green = countBalls(Ball.GREEN);
+			System.out.println("green: "+balls_green);
 			int balls_red = countBalls(Ball.RED);
+			System.out.println("red: "+balls_red);
 
 			int balls_m = countBalls(m);
 
 			// Kijk nu wie de meeste ballen heeft
 			int balls_max = Math.max(Math.max(balls_green, balls_red),
 					Math.max(balls_blue, balls_yellow));
-			return (balls_max == balls_m) && (!((balls_yellow == balls_blue) == (balls_green == balls_red)));
+			System.out.println("max: "+balls_max);
+			return (balls_m == balls_max || !isDraw(balls_yellow, balls_blue, balls_green, balls_red, balls_max));
+		}
+		return false;
+	}
+
+	private boolean isDraw(int balls_yellow, int balls_blue, int balls_green,
+			int balls_red, int balls_max) {
+		int[] arr = new int[4];
+		arr[0] = balls_yellow;
+		arr[1] = balls_blue;
+		arr[2] = balls_green;
+		arr[3] = balls_red;
+		for (int i = 0; i<arr.length; i++){
+			for (int j = 0; j<arr.length; j++){
+				if (arr[i] == arr[j] && arr[i] == balls_max){
+					return true;
+				}
+			}
 		}
 		return false;
 	}
@@ -390,11 +412,5 @@ public class Board {
 	 */
 	public void setField(int row, int col, Ball m) {
 		setField(index(row, col), m);
-	}
-	
-	public static void main (String[] args){
-		Board bord = new Board();
-		bord.reset();
-		System.out.println(bord);
 	}
 }

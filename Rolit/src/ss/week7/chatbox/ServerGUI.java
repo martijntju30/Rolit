@@ -18,6 +18,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import project.Game;
+
 /**
  * ServerGui. A GUI for the Server.
  * @author  Theo Ruys
@@ -29,6 +31,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	private JTextField tfPort;
 	private JTextArea taMessages;
 	private Server server;
+	private Game game;
 
 	/** Constructs a ServerGUI object. */
 	public ServerGUI() {
@@ -132,6 +135,8 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		server.start();
 
 		addMessage("Started listening on port " + port + "...");
+		//De server en chatbox zijn nu gestart, start nu ook begin voor de game.
+		server.HandleRolitGame();
 	}
 
 	/** add a message to the textarea  */

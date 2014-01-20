@@ -28,16 +28,19 @@ import javax.swing.event.DocumentListener;
 
 /**
  * ClientGui. A GUI for the Client.
- * @author  Theo Ruys
+ * 
+ * @author Theo Ruys
  * @version 2005.02.21
  */
 @SuppressWarnings("serial")
-public class ClientGUI extends JFrame implements ActionListener, MessageUI, DocumentListener {
+public class ClientGUI extends JFrame implements ActionListener, MessageUI,
+		DocumentListener {
 
 	private JButton bConnect;
 	private JTextField tfHost;
 	private JTextField tfPort;
 	private JTextField tfName;
+	private JTextField tfSpelers;
 	private JTextArea taMessages;
 	private JTextField taMyMessages;
 	private Client Client;
@@ -53,6 +56,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI, Docu
 			public void windowClosing(WindowEvent e) {
 				e.getWindow().dispose();
 			}
+
 			public void windowClosed(WindowEvent e) {
 				System.exit(0);
 			}
@@ -66,7 +70,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI, Docu
 		// Panel p1 - Listen
 
 		JPanel p1 = new JPanel(new FlowLayout());
-		JPanel pp = new JPanel(new GridLayout(3, 4));
+		JPanel pp = new JPanel(new GridLayout(4, 4));
 
 		JLabel lbHost = new JLabel("Hostname: ");
 		tfHost = new JTextField(getHostAddress(), 12);
@@ -82,6 +86,10 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI, Docu
 		tfName = new JTextField("", 15);
 		tfName.getDocument().addDocumentListener(this);
 		tfName.addActionListener(this);
+		JLabel lbSpelers = new JLabel("Aantal spelers:");
+		tfSpelers = new JTextField("", 15);
+		tfSpelers.getDocument().addDocumentListener(this);
+		tfSpelers.addActionListener(this);
 
 		pp.add(lbHost);
 		pp.add(tfHost);
@@ -89,6 +97,8 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI, Docu
 		pp.add(tfPort);
 		pp.add(lbName);
 		pp.add(tfName);
+		pp.add(lbSpelers);
+		pp.add(tfSpelers);
 
 		bConnect = new JButton("Connect");
 		bConnect.addActionListener(this);
@@ -104,10 +114,11 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI, Docu
 		JLabel lbMessages = new JLabel("Messages:");
 		taMessages = new JTextArea("", 15, 50);
 		taMessages.setEditable(false);
-		taMessages.setBorder(BorderFactory.createMatteBorder(2,2,2,2,Color.red));
+		taMessages.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2,
+				Color.red));
 		p2.add(lbMessages);
 		p2.add(taMessages, BorderLayout.SOUTH);
-		
+
 		// Panel p3 - Messages
 
 		JPanel p3 = new JPanel();
@@ -116,7 +127,8 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI, Docu
 		JLabel lbMyMessages = new JLabel("My message:");
 		taMyMessages = new JTextField("", 50);
 		taMyMessages.setEditable(false);
-		taMyMessages.setBorder(BorderFactory.createMatteBorder(2,2,2,2,Color.red));
+		taMyMessages.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2,
+				Color.red));
 		taMyMessages.addActionListener(this);
 		p3.add(lbMyMessages);
 		p3.add(taMyMessages, BorderLayout.SOUTH);
@@ -145,16 +157,16 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI, Docu
 		Object src = ev.getSource();
 		if (src == bConnect) {
 			startListening();
-		}
-		else if (src == taMyMessages){
-			System.out.println("NEW MESSAGE SEND: "+taMyMessages.getText());
+		} else if (src == taMyMessages) {
+			System.out.println("NEW MESSAGE SEND: " + taMyMessages.getText());
 			Client.sendMessage(taMyMessages.getText());
 			taMyMessages.setText("");
 		}
 	}
 
 	/**
-	 * Construct a Client-object, which is waiting for clients. The port field and button should be disabled
+	 * Construct a Client-object, which is waiting for clients. The port field
+	 * and button should be disabled
 	 */
 	private void startListening() {
 		int port = 0;
@@ -166,39 +178,42 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI, Docu
 			e1.printStackTrace();
 		}
 		String name = "No Name";
+		int spelers = 4;
 		int max = 0;
 
 		try {
 			port = Integer.parseInt(tfPort.getText());
 			host = InetAddress.getByName(tfHost.getText());
 			name = tfName.getText();
+			spelers = Integer.parseInt(tfSpelers.getText());
 		} catch (NumberFormatException e) {
 			addMessage("ERROR: not a valid portnumber!");
 			return;
-		}
-		catch (UnknownHostException e) {
-				addMessage("ERROR: not a valid host!");
-				return;
+		} catch (UnknownHostException e) {
+			addMessage("ERROR: not a valid host!");
+			return;
 		}
 
 		tfPort.setEditable(false);
 		tfHost.setEditable(false);
 		tfName.setEditable(false);
+		tfSpelers.setEditable(false);
 		taMyMessages.setEditable(true);
 		bConnect.setEnabled(false);
 
 		try {
-			Client = new Client(name, host, port, this);
+			Client = new Client(name, spelers, host, port, this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Client.start();
 
-		addMessage("Started searching on port " + port + " of host "+ host +"...");
+		addMessage("Started searching on port " + port + " of host " + host
+				+ "...");
 	}
 
-	/** add a message to the textarea  */
+	/** add a message to the textarea */
 	public void addMessage(String msg) {
 		taMessages.append(msg + "\n");
 		System.out.println(msg);
@@ -223,17 +238,24 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI, Docu
 	public void removeUpdate(DocumentEvent e) {
 		tfUpdates(e);
 	}
-	
-	private void tfUpdates(DocumentEvent e){
+
+	private void tfUpdates(DocumentEvent e) {
 		Object src = e.getDocument();
-		System.out.println("src="+src);
-		if (src == tfHost.getDocument() || src == tfPort.getDocument() || src == tfName.getDocument()) {
-			System.out.println("CHANGE en port: "+Integer.parseInt(tfPort.getText()));
-			if (!tfHost.getText().equals("") && !tfPort.getText().equals("") && !tfName.getText().equals("") && !(Integer.parseInt(tfPort.getText())<=0)){
-				//De gegevens zijn allemaal ingevuld, klaar voor connect
+		System.out.println("src=" + src);
+		if (src == tfHost.getDocument() || src == tfPort.getDocument()
+				|| src == tfName.getDocument()
+				|| src == tfSpelers.getDocument()) {
+			System.out.println("CHANGE en port: "
+					+ Integer.parseInt(tfPort.getText()));
+			if (!tfHost.getText().equals("") && !tfPort.getText().equals("")
+					&& !tfName.getText().equals("")
+					&& !tfSpelers.getText().equals("")
+					&& !(Integer.parseInt(tfPort.getText()) <= 0)
+					&& !(Integer.parseInt(tfSpelers.getText()) <= 1)
+					&& !(Integer.parseInt(tfSpelers.getText()) > 4)) {
+				// De gegevens zijn allemaal ingevuld, klaar voor connect
 				bConnect.setEnabled(true);
-			}
-			else {
+			} else {
 				bConnect.setEnabled(false);
 			}
 		}

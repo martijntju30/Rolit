@@ -55,5 +55,6 @@ public interface RolitConstants {
 	String errorOngeldigCommando = "ongeldigCommando";
 	String errorGebruikersnaamInGebruik = "gebruikersnaamInGebruik";
 	String errorAantalSpelersOngeldig = "aantalSpelersOngeldig";
+	String errorSpelVol = "SpelVol";
 
 }
