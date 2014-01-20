@@ -118,4 +118,8 @@ public class Player {
         int keuze = determineMove(board);
         game.takeTurn(keuze);
     }
+    
+    public String toString(){
+    	return getName();
+    }
 }

@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Arrays;
 
 import project.Game;
 import project.RolitConstants;
@@ -133,7 +134,26 @@ public class ClientHandler extends Thread {
 			out.flush();
 		} catch (IOException e) {
 			System.out.println("ERROR: er was een exceptie: " + e.getMessage()
-					+ "\n met een pad: " + e.getStackTrace());
+					+ "\n met een pad: " + Arrays.toString(e.getStackTrace()));
+			shutdown();
+		}
+	}
+
+	/**
+	 * This method can be used to send a message over the socket connection to
+	 * the Client. If the writing of a message fails, the method concludes that
+	 * the socket connection has been lost and shutdown() is called.
+	 */
+	public void sendCommand(String msg) {
+		try {
+			System.out.println("Handler: ik heb een command: " + msg);
+			out.write(msg);
+			System.out.println("FLUSSHHHHHH");
+			out.flush();
+			System.out.println("FLUSSHHHHHHED");
+		} catch (IOException e) {
+			System.out.println("ERROR: er was een exceptie: " + e.getMessage()
+					+ "\n met een pad: " + Arrays.toString(e.getStackTrace()));
 			shutdown();
 		}
 	}
@@ -154,6 +174,10 @@ public class ClientHandler extends Thread {
 
 	protected int getGameID() {
 		return this.gameID;
+	}
+	
+	public String getClientName(){
+		return clientName;
 	}
 
 } // end of class ClientHandler
