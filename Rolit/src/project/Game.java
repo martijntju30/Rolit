@@ -62,9 +62,21 @@ public class Game extends Observable {
 	 * @param s1
 	 *            the second player
 	 */
-	public Game(int numberofplayers, Player s0, Player s1, Player s2, Player s3) {
+	public Game(Player s0, Player s1, Player s2, Player s3) {
 		board = new Board();
-		NUMBER_PLAYERS = numberofplayers;
+		if (s0 != null){
+			NUMBER_PLAYERS++;
+		}
+		if (s1 != null){
+			NUMBER_PLAYERS++;
+		}
+		if (s2 != null){
+			NUMBER_PLAYERS++;
+		}
+		if (s3 != null){
+			NUMBER_PLAYERS++;
+		}
+		
 		players = new Player[NUMBER_PLAYERS];
 		score = new int[NUMBER_PLAYERS];
 		players[0] = s0;
