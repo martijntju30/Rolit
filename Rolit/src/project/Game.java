@@ -18,7 +18,7 @@ public class Game extends Observable {
 
 	// -- Instance variables -----------------------------------------
 
-	public static final int NUMBER_PLAYERS = 4;
+	public static int NUMBER_PLAYERS;
 
 	/*
 	 * @ private invariant board != null;
@@ -62,8 +62,9 @@ public class Game extends Observable {
 	 * @param s1
 	 *            the second player
 	 */
-	public Game(Player s0, Player s1, Player s2, Player s3) {
+	public Game(int numberofplayers, Player s0, Player s1, Player s2, Player s3) {
 		board = new Board();
+		NUMBER_PLAYERS = numberofplayers;
 		players = new Player[NUMBER_PLAYERS];
 		score = new int[NUMBER_PLAYERS];
 		players[0] = s0;

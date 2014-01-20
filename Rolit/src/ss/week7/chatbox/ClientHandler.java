@@ -147,7 +147,7 @@ public class ClientHandler extends Thread {
 	public void sendCommand(String msg) {
 		try {
 			System.out.println("Handler: ik heb een command: " + msg);
-			out.write(msg);
+			out.write(msg+"\n");
 			System.out.println("FLUSSHHHHHH");
 			out.flush();
 			System.out.println("FLUSSHHHHHHED");
