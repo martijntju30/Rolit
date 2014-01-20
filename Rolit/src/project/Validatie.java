@@ -70,7 +70,6 @@ public class Validatie {
 		HashSet<Integer> result = new HashSet<Integer>();
 		for (int i = -1; i < 2; i++) {
 			for (int j = -1; j < 2; j++) {
-				System.out.println("Kijk naar ("+i+","+j+")");
 				Set<Integer> takeOvers = getTakeOvers(zet, board, player, i, j);
 				if (takeOvers != null && takeOvers.size() > 0) {
 					result.addAll(takeOvers);

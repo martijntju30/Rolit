@@ -12,6 +12,7 @@ import java.util.Arrays;
 import project.Game;
 import project.RolitConstants;
 import project.RolitControl;
+import project.Validatie;
 
 /**
  * ClientHandler.
@@ -27,7 +28,7 @@ public class ClientHandler extends Thread {
 	private BufferedWriter out;
 	private String clientName;
 	private int gameID;
-	private Game game;
+	public Game game;
 	private int preferredPlayers;
 
 	/**
@@ -98,7 +99,7 @@ public class ClientHandler extends Thread {
 		System.out.println("Er is een nieuw command aangeroepen om uitgevoerd te worden. \n Dit command is: "+line);
 		String[] commandline = line.split(RolitConstants.msgDelim);
 		String command = commandline[0];
-		
+		server.addMessage(line);
 		switch(command){
 		case (RolitControl.speelSpel) :
 			clientName = commandline[1];
@@ -114,12 +115,27 @@ public class ClientHandler extends Thread {
 			}
 			server.broadcast(clientName + " says: " + zin);
 			break;
+		case RolitControl.doeZet:
+			int zet = Integer.parseInt(commandline[1]);
+			if (Validatie.validMove(zet, game.getBoard(), game
+					.getCurrentPlayer())) {
+				game.takeTurn(zet, true);
+				server.broadcast(line);
+			}
+			else {
+				sendError(RolitConstants.errorOngeldigeZet);
+			}
+			break;
 			
 		default:
-			out.write(RolitConstants.errorOngeldigCommando);
-			out.flush();
+			sendError(RolitConstants.errorOngeldigCommando);
 			break;
 		}
+	}
+
+	private void sendError(String errormsg) {
+		sendMessage(errormsg);
+		sendCommand(errormsg);
 	}
 
 	/**

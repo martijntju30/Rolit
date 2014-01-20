@@ -118,23 +118,29 @@ public class Server extends Thread {
 		threads.remove(handler);
 	}
 
-	public void command(String line, int gameID) {
-		// Er is een command doorgekomen. Die moet in de server wel worden
-		// geprint maar niet naar alle clients gebroadcast in het chatvenster.
-		if (game != null && game.get(gameID) != null) {
-			String[] parts = line.split(" ");
-			String command = parts[0];
-			switch (command) {
-			case "move":
-				((Game) game).takeTurn(((Game) game.get(gameID)).getBoardCopy()
-						.index(Integer.parseInt(parts[1]),
-								Integer.parseInt(parts[2])));
-				break;
-			}
-		} else {
-			mui.addMessage("ERROR: command voor game maar game is nog niet gestart");
-		}
-	}
+//	public void command(String line, int gameID, ClientHandler from) {
+//		// Er is een command doorgekomen. Die moet in de server wel worden
+//		// geprint maar niet naar alle clients gebroadcast in het chatvenster.
+//		if (game != null && game.get(gameID) != null) {
+//			String[] parts = line.split(" ");
+//			String command = parts[0];
+//			switch (command) {
+//			case RolitControl.doeZet:
+//				int zet = Integer.parseInt(parts[1]);
+//				if (Validatie.validMove(zet, game.get(gameID).getBoard(), game
+//						.get(gameID).getCurrentPlayer())) {
+//					game.get(gameID).takeTurn(zet, true);
+//					broadcast(line);
+//				}
+//				else {
+//					from.sendMessage(RolitConstants.errorOngeldigeZet);
+//				}
+//				break;
+//			}
+//		} else {
+//			mui.addMessage("ERROR: command voor game maar game is nog niet gestart");
+//		}
+//	}
 
 	public void HandleRolitGame() {
 		if (playersFor2.size() / 2 == 1) {
@@ -165,9 +171,11 @@ public class Server extends Thread {
 			p[count] = new Player(client.getClientName(), kleuren[count]);
 			count++;
 		}
-		game.add(new Game(p[0], p[1], p[2], p[3]));
+		Game g = new Game(p[0], p[1], p[2], p[3], null);
+		game.add(g);
 		int gameID = game.size() - 1;
 		for (ClientHandler client : handlers) {
+			client.game = g;
 			client.sendCommand(RolitControl.beginSpel + RolitConstants.msgDelim
 					+ p[0] + RolitConstants.msgDelim + p[1]
 					+ RolitConstants.msgDelim + p[2] + RolitConstants.msgDelim
@@ -178,6 +186,10 @@ public class Server extends Thread {
 		// Verwijder tenslotte de clients uit de playersset
 		handlers.removeAll(handlers);
 
+	}
+
+	public void addMessage(String line) {
+		mui.addMessage(line);
 	}
 
 } // end of class Server

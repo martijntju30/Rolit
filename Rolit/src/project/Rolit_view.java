@@ -15,7 +15,7 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 	private Container container;
 	private JPanel c;
 	
-	private boolean useImg = true;//Wil je images gebruiken? True=ja, False = nee;
+	private boolean useImg = false;//Wil je images gebruiken? True=ja, False = nee;
 	
 	//Maak alle buttons
 	private JButton[] button = new JButton[bord.DIM * bord.DIM];

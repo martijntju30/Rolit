@@ -8,6 +8,8 @@ import java.util.Observable;
 import java.util.Scanner;
 import java.util.Set;
 
+import ss.week7.chatbox.Client;
+
 /**
  * Class for maintaining the Tic Tac Toe game. Lab assignment Module 2
  * 
@@ -49,8 +51,9 @@ public class Game extends Observable {
 	 */
 	private int current;
 
-	// -- Constructors -----------------------------------------------
+	private Client client;
 
+	// -- Constructors -----------------------------------------------
 	/*
 	 * @ requires s0 != null; requires s1 != null;
 	 */
@@ -62,28 +65,41 @@ public class Game extends Observable {
 	 * @param s1
 	 *            the second player
 	 */
-	public Game(Player s0, Player s1, Player s2, Player s3) {
+	public Game(Player s0, Player s1, Player s2, Player s3, Client client) {
+		this.client = client;
 		board = new Board();
-		if (s0 != null){
+		if (s0 != null) {
 			NUMBER_PLAYERS++;
 		}
-		if (s1 != null){
+		if (s1 != null) {
 			NUMBER_PLAYERS++;
 		}
-		if (s2 != null){
+		if (s2 != null) {
 			NUMBER_PLAYERS++;
 		}
-		if (s3 != null){
+		if (s3 != null) {
 			NUMBER_PLAYERS++;
 		}
-		
+
 		players = new Player[NUMBER_PLAYERS];
 		score = new int[NUMBER_PLAYERS];
-		players[0] = s0;
-		players[1] = s1;
-		players[2] = s2;
-		players[3] = s3;
+		if (s0 != null) {
+			players[0] = s0;
+		}
+		if (s1 != null) {
+			players[1] = s1;
+		}
+		if (s2 != null) {
+			players[2] = s2;
+		}
+		if (s3 != null) {
+			players[3] = s3;
+		}
+		
 		current = 0;
+
+		view = new Rolit_view(this);
+		System.out.println("GAME GESTART");
 	}
 
 	// -- Commands ---------------------------------------------------
@@ -140,7 +156,6 @@ public class Game extends Observable {
 	protected void reset() {
 		current = 0;
 		board.reset();
-		view = new Rolit_view(this);
 	}
 
 	// B{Spel.play}
@@ -213,28 +228,33 @@ public class Game extends Observable {
 		}
 	}
 
-	protected Board getBoard() {
+	public Board getBoard() {
 		return board;
 	}
 
-	protected Player getCurrentPlayer() {
+	public Player getCurrentPlayer() {
 		return players[current];
 	}
 
 	private void applyRules(int zet) {
-		Set<Integer> toChange = Validatie.getPossibleTakeOvers(zet, board, getCurrentPlayer());
+		Set<Integer> toChange = Validatie.getPossibleTakeOvers(zet, board,
+				getCurrentPlayer());
 
 		// Wijzig nu alle vakjes die in toChange staan
-		for (Integer i: toChange){
+		for (Integer i : toChange) {
 			board.setField(i, getCurrentPlayer().getBall());
 		}
 	}
 
 	public void takeTurn(int i) {
+		takeTurn(i, false);
+	}
+
+	public void takeTurn(int i, boolean fromServer) {
 		int choice = i;
 		boolean valid = board.isField(choice) && board.isEmptyField(choice)
 				&& Validatie.validMove(choice, board, getCurrentPlayer());
-		if (!valid) {
+		if (!valid && !fromServer) {//De !fromServer is zodat de game weet dat als het wel op de server toegestaan is, dan wil de client dit ook op zijn bord terugzien.
 			view.label
 					.setText("This is not a valid move. Please try again \nIt's "
 							+ getCurrentPlayer().getName()
@@ -243,17 +263,21 @@ public class Game extends Observable {
 			view.repaint();
 			view.invalidate();
 		} else {
-			board.setField(choice, getCurrentPlayer().getBall());
-			applyRules(i);
-			nextPlayer();
-			update();
-			if (board.gameOver()) {
-				printResult();
+			if (fromServer || client == null) {
+				board.setField(choice, getCurrentPlayer().getBall());
+				applyRules(i);
+
+				nextPlayer();
+				update();
+				if (board.gameOver()) {
+					printResult();
+				}
+			} else {
+				client.sendCommand(RolitControl.doeZet
+						+ RolitConstants.msgDelim + i);
 			}
 		}
 	}
-
-	
 
 	/*
 	 * private Set<Integer> getPossibleTakeOvers(int zet) { /** CAMILIO, KUN JIJ

@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import project.Ball;
 import project.Game;
@@ -112,6 +113,17 @@ public class Client extends Thread {
 					+ ". Please try again!");
 		}
 	}
+	public void sendCommand(String msg) {
+		try {
+			System.out.println("client: ik heb een command: " + msg);
+			out.write(msg+"\n");
+			out.flush();
+		} catch (IOException e) {
+			System.out.println("ERROR: er was een exceptie: " + e.getMessage()
+					+ "\n met een pad: " + Arrays.toString(e.getStackTrace()));
+			shutdown();
+		}
+	}
 
 	/** close the socket connection. */
 	public void shutdown() {
@@ -149,7 +161,7 @@ public class Client extends Thread {
 						new Player(commandline[i], 
 								kleuren[i-1]);
 			}
-			game = new Game(p[0], p[1], p[2], p[3]);
+			game = new Game(p[0], p[1], p[2], p[3], this);
 			view = new Rolit_view(game);
 			break;
 
@@ -162,6 +174,10 @@ public class Client extends Thread {
 			}
 			mui.addMessage(zin);
 			break;
+			
+		case RolitControl.doeZet:
+			System.out.println("Er wordt een zet gedaan..... "+commandline[1]);
+			game.takeTurn(Integer.parseInt(commandline[1]), true);
 
 		default:
 			out.write(RolitConstants.errorOngeldigCommando);

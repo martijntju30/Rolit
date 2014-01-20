@@ -142,7 +142,6 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	/** add a message to the textarea  */
 	public void addMessage(String msg) {
 		taMessages.append(msg + "\n");
-		System.out.println(msg);
 	}
 
 	/** Start a ServerGUI application */
