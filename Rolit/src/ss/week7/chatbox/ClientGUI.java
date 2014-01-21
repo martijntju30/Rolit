@@ -158,7 +158,6 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		if (src == bConnect) {
 			startListening();
 		} else if (src == taMyMessages) {
-			System.out.println("NEW MESSAGE SEND: " + taMyMessages.getText());
 			Client.sendMessage(taMyMessages.getText());
 			taMyMessages.setText("");
 		}
@@ -216,7 +215,6 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 	/** add a message to the textarea */
 	public void addMessage(String msg) {
 		taMessages.append(msg + "\n");
-		System.out.println(msg);
 	}
 
 	/** Start a ClientGUI application */
@@ -241,12 +239,9 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 
 	private void tfUpdates(DocumentEvent e) {
 		Object src = e.getDocument();
-		System.out.println("src=" + src);
 		if (src == tfHost.getDocument() || src == tfPort.getDocument()
 				|| src == tfName.getDocument()
 				|| src == tfSpelers.getDocument()) {
-			System.out.println("CHANGE en port: "
-					+ Integer.parseInt(tfPort.getText()));
 			if (!tfHost.getText().equals("") && !tfPort.getText().equals("")
 					&& !tfName.getText().equals("")
 					&& !tfSpelers.getText().equals("")

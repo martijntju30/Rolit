@@ -273,6 +273,7 @@ public class Game extends Observable {
 				} else {//De client heeft een zet gedaan, stuur dit naar de server.
 					client.sendCommand(RolitControl.doeZet
 							+ RolitConstants.msgDelim + choice); //DIT GAAT NOG GOED!
+					return;
 				}
 			}
 //		} else {

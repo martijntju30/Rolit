@@ -50,6 +50,7 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 	}
 
 	public void showBoard() {
+		System.out.println("HET BORD MOET EEN UPDATE KRIJGEN");
 		//Leeg de container
 		//container.removeAll();
 		c.removeAll();
@@ -148,7 +149,10 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 			//Het label wie aan de beurt is.
 			Player currentplayer = g.getCurrentPlayer();
 			label.setText("It's "+currentplayer.getName()+"'s ("+currentplayer.getBall()+") turn.");
+			c.removeAll();
 			showBoard();
+			repaint();
+			invalidate();
 		}
 	}
 
@@ -161,6 +165,8 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 			//button[button_index].setEnabled(false);
 			g.takeTurn(button_index);
 			showBoard();
+			repaint();
+			invalidate();
 		}
 	}
 }
