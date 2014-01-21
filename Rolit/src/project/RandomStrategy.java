@@ -1,7 +1,5 @@
 package project;
 
-import java.util.Set;
-
 public class RandomStrategy extends Player {
 
 	public RandomStrategy(String theName, project.Ball theBall) {
@@ -10,13 +8,6 @@ public class RandomStrategy extends Player {
 	}
 	@Override
 	public int determineMove(Board board) {
-		Set<Integer> empty = Validatie.getFreeIndexes(board);
-		for (Integer i: empty){
-			if (Validatie.validMove(i, board, this)){
-
-				return i;
-			}
-		}
-		return 0;
+		return Strategys.getRandom(board, this);
     }
 }

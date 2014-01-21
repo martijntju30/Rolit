@@ -1,4 +1,4 @@
-package ss.week7.chatbox;
+package project;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -29,6 +29,7 @@ public class Client extends Thread {
 	private BufferedWriter out;
 	private Game game;
 	private Rolit_view view;
+	private Ball clientKleur;
 
 	/**
 	 * Constructs a Client-object and tries to make a socket connection
@@ -130,13 +131,9 @@ public class Client extends Thread {
 	}
 
 	public void HandleCommand(String line) throws IOException {
-		if (line == null || line.equals(""))
+		if (line == null || line.equals("")) {
 			return;
-		System.out
-				.println("=======================================================\n "
-						+ "Er is een nieuw command aangeroepen om uitgevoerd te worden door de client. \n Dit command is: "
-						+ line
-						+ "\n======================================================= ");
+		}
 		String[] commandline = line.split(RolitConstants.msgDelim);
 		String command = commandline[0];
 
@@ -150,8 +147,14 @@ public class Client extends Thread {
 			kleuren[3] = Ball.BLUE;
 			for (int i = 1; i < commandline.length; i++) {
 				p[i - 1] = new Player(commandline[i], kleuren[i - 1]);
+				if (commandline[i].equals(clientName)) {
+					clientKleur = p[i-1].getBall();
+				}
 			}
 			game = new Game(p[0], p[1], p[2], p[3], this);
+			view = game.view;
+			view.kleur.setText("Your color: "+clientKleur.toString());
+			view.invalidate();
 			break;
 
 		case (RolitControl.nieuwChatbericht):

@@ -1,4 +1,4 @@
-package ss.week7.chatbox;
+package project;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -20,8 +20,10 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -117,7 +119,9 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		taMessages.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2,
 				Color.red));
 		p2.add(lbMessages);
-		p2.add(taMessages, BorderLayout.SOUTH);
+		JScrollPane scroll = new JScrollPane(taMessages);
+	    scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		p2.add(scroll, BorderLayout.SOUTH);
 
 		// Panel p3 - Messages
 

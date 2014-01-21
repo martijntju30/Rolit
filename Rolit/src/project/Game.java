@@ -8,8 +8,6 @@ import java.util.Observable;
 import java.util.Scanner;
 import java.util.Set;
 
-import ss.week7.chatbox.Client;
-
 /**
  * Class for maintaining the Tic Tac Toe game. Lab assignment Module 2
  * 
@@ -29,7 +27,7 @@ public class Game extends Observable {
 	 * The board.
 	 */
 	private Board board;
-	private Rolit_view view;
+	protected Rolit_view view;
 
 	/*
 	 * @ private invariant players.length == NUMBER_PLAYERS; private (\forall
@@ -245,12 +243,12 @@ public class Game extends Observable {
 	}
 
 	public void takeTurn(int choice, boolean fromServer) {
-//		if (client == null || 
-//				(client.getClientName() !=null && client.getClientName().equals(getCurrentPlayer().getName())) || 
-//				fromServer) {
-//			if (client == null) {
-//				System.out.println("SERVER VOERT UPDATE UIT!");
-//			}
+		if (client == null || 
+				(client.getClientName() !=null && client.getClientName().equals(getCurrentPlayer().getName())) || 
+				fromServer) {
+			if (client == null) {
+				System.out.println("SERVER VOERT UPDATE UIT!");
+			}
 			boolean valid = board.isField(choice) && board.isEmptyField(choice)
 					&& Validatie.validMove(choice, board, getCurrentPlayer());
 			if (!valid) {
@@ -276,13 +274,13 @@ public class Game extends Observable {
 					return;
 				}
 			}
-//		} else {
-//			view.label.setText("It is not your turn. It's "
-//					+ getCurrentPlayer().getName() + "'s ("
-//					+ getCurrentPlayer().getBall() + ") turn.");
-//			view.repaint();
-//			view.invalidate();
-//		}
+		} else {
+			view.label.setText("It is not your turn. It's "
+					+ getCurrentPlayer().getName() + "'s ("
+					+ getCurrentPlayer().getBall() + ") turn.");
+			view.repaint();
+			view.invalidate();
+		}
 	}
 
 	public Board getBoardCopy() {

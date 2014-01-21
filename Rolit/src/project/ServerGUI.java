@@ -1,4 +1,4 @@
-package ss.week7.chatbox;
+package project;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -15,10 +15,10 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-
-import project.Game;
+import javax.swing.ScrollPaneConstants;
 
 /**
  * ServerGui. A GUI for the Server.
@@ -86,7 +86,9 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		taMessages = new JTextArea("", 15, 50);
 		taMessages.setEditable(false);
 		p2.add(lbMessages);
-		p2.add(taMessages, BorderLayout.SOUTH);
+		JScrollPane scroll = new JScrollPane(taMessages);
+	    scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		p2.add(scroll, BorderLayout.SOUTH);
 
 		Container cc = getContentPane();
 		cc.setLayout(new FlowLayout());

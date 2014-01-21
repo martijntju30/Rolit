@@ -1,4 +1,4 @@
-package ss.week7.chatbox;
+package project;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,11 +8,6 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
-
-import project.Game;
-import project.RolitConstants;
-import project.RolitControl;
-import project.Validatie;
 
 /**
  * ClientHandler.
@@ -27,7 +22,7 @@ public class ClientHandler extends Thread {
 	private BufferedReader in;
 	private BufferedWriter out;
 	private String clientName;
-	private int gameID;
+	public int gameID;
 	public Game game;
 	private int preferredPlayers;
 
@@ -118,7 +113,7 @@ public class ClientHandler extends Thread {
 			System.out.println("De zet is: " + zet);
 			if (Validatie.validMove(zet, game.getBoard(),
 					game.getCurrentPlayer())) {
-				server.broadcastCommand(line);
+				server.broadcastCommand(line, gameID);
 				game.takeTurn(zet, true);
 			} else {
 				sendError(RolitConstants.errorOngeldigeZet);

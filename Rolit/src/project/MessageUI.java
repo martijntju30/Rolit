@@ -1,4 +1,4 @@
-package ss.week7.chatbox;
+package project;
 
 /**
  * P2 prac wk4.

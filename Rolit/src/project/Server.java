@@ -1,4 +1,4 @@
-package ss.week7.chatbox;
+package project;
 
 import java.io.*;
 import java.net.*;
@@ -63,12 +63,14 @@ public class Server extends Thread {
 			handler.sendMessage(msg + "\n");
 		}
 	}
-	public void broadcastCommand(String msg) {
+	public void broadcastCommand(String msg, int ID) {
 		mui.addMessage(msg);
 		Iterator<ClientHandler> threadIter = threads.iterator();
 		while (threadIter.hasNext()) {
 			ClientHandler handler = threadIter.next();
+			if (handler.gameID == ID){
 			handler.sendCommand(msg + "\n");
+			}
 		}
 	}
 
