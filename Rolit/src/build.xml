@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="build">
+	<path id="build.classpath">
+		<pathelement location="classes"/>
+	</path>
+	<target name="init">
+		<mkdir dir="classes"/>
+	</target>
+	<target name="clean">
+		<delete dir="classes"/>
+	</target>
+	<target depends="init" name="build">
+		<javac srcdir="." destdir="classes" source="1.5" target="1.5" fork="yes">
+			<classpath refid="build.classpath"/>
+			<include name="project/Player.java"/>
+			<include name="project/Ball.java"/>
+			<include name="project/Rolit_view.java"/>
+			<include name="project/Board.java"/>
+			<include name="project/Game.java"/>
+			<include name="project/Leaderboard.java"/>
+		</javac>
+	</target>
+</project>
