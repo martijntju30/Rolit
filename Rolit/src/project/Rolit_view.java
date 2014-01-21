@@ -34,7 +34,7 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 			}
 		});
 		
-		label = new JLabel("Start game");
+		label = new JLabel("Start game, RED is allowed to start the game.");
 		container = getContentPane();
 		//c = getContentPane();
 		container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
@@ -144,7 +144,6 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		System.out.println("Er is een update!!!"+arg0.getClass());
 		if (arg0 != null) {
 			//Het label wie aan de beurt is.
 			Player currentplayer = g.getCurrentPlayer();
@@ -160,7 +159,6 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 			String[] chars = arg0.toString().split(" ");
 			int button_index = Integer.parseInt(chars[chars.length-1]);
 			//button[button_index].setEnabled(false);
-			//System.out.println("button "+button_index+" is aangeklikt. Uit source: "+arg0.toString());
 			g.takeTurn(button_index);
 			showBoard();
 		}

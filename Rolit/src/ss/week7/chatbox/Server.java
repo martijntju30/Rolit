@@ -40,7 +40,6 @@ public class Server extends Thread {
 			ServerSocket serverSock = new ServerSocket(port);
 			while (true) {
 				Socket newSock = serverSock.accept();
-				System.out.println("NEW CLIENT FOUND");
 				addHandler(new ClientHandler(this, newSock));
 			}
 		} catch (IOException e) {
@@ -56,13 +55,20 @@ public class Server extends Thread {
 	 * @param msg
 	 *            message that is send
 	 */
-	public void broadcast(String msg) {
+	public void broadcastMessage(String msg) {
 		mui.addMessage(msg);
 		Iterator<ClientHandler> threadIter = threads.iterator();
 		while (threadIter.hasNext()) {
 			ClientHandler handler = threadIter.next();
-			System.out.println("Send message from server to: " + handler);
 			handler.sendMessage(msg + "\n");
+		}
+	}
+	public void broadcastCommand(String msg) {
+		mui.addMessage(msg);
+		Iterator<ClientHandler> threadIter = threads.iterator();
+		while (threadIter.hasNext()) {
+			ClientHandler handler = threadIter.next();
+			handler.sendCommand(msg + "\n");
 		}
 	}
 
@@ -159,10 +165,9 @@ public class Server extends Thread {
 	}
 
 	private void newGame(Set<ClientHandler> handlers) {
-		System.out.println("EEN NIEUWE GAME STARTEN!!");
 		int count = 0;
 		Ball[] kleuren = new Ball[4];
-		Player[] p = new Player[4];
+		Player[] p = new Player[]{null, null, null, null};
 		kleuren[0] = Ball.RED;
 		kleuren[1] = Ball.GREEN;
 		kleuren[2] = Ball.YELLOW;

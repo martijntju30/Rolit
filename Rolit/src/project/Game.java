@@ -20,7 +20,7 @@ public class Game extends Observable {
 
 	// -- Instance variables -----------------------------------------
 
-	public static int NUMBER_PLAYERS;
+	public int NUMBER_PLAYERS = 0;
 
 	/*
 	 * @ private invariant board != null;
@@ -68,38 +68,38 @@ public class Game extends Observable {
 	public Game(Player s0, Player s1, Player s2, Player s3, Client client) {
 		this.client = client;
 		board = new Board();
-		if (s0 != null) {
+		if (s0 != null && !s0.getName().equals("null")) {
 			NUMBER_PLAYERS++;
 		}
-		if (s1 != null) {
+		if (s1 != null && !s1.getName().equals("null")) {
 			NUMBER_PLAYERS++;
 		}
-		if (s2 != null) {
+		if (s2 != null && !s2.getName().equals("null")) {
 			NUMBER_PLAYERS++;
 		}
-		if (s3 != null) {
+		if (s3 != null && !s3.getName().equals("null")) {
 			NUMBER_PLAYERS++;
 		}
 
 		players = new Player[NUMBER_PLAYERS];
 		score = new int[NUMBER_PLAYERS];
-		if (s0 != null) {
+		if (s0 != null && !s0.getName().equals("null")) {
 			players[0] = s0;
 		}
-		if (s1 != null) {
+		if (s1 != null && !s1.getName().equals("null")) {
 			players[1] = s1;
 		}
-		if (s2 != null) {
+		if (s2 != null && !s2.getName().equals("null")) {
 			players[2] = s2;
 		}
-		if (s3 != null) {
+		if (s3 != null && !s3.getName().equals("null")) {
 			players[3] = s3;
 		}
-		
-		current = 0;
 
-		view = new Rolit_view(this);
-		System.out.println("GAME GESTART");
+		current = 0;
+		if (client != null) {
+			view = new Rolit_view(this);
+		}
 	}
 
 	// -- Commands ---------------------------------------------------
@@ -188,9 +188,6 @@ public class Game extends Observable {
 	 * Prints the game situation.
 	 */
 	private void update() {
-		// view.showBoard();
-		System.out.println("\ncurrent game situation: \n\n" + board.toString()
-				+ "\n");
 		this.setChanged();
 		this.notifyObservers();
 	}
@@ -214,15 +211,12 @@ public class Game extends Observable {
 			} else if (board.isWinner(players[3].getBall())) {
 				playernum = 3;
 			}
-			System.out.println("Speler " + players[playernum].getName() + " ("
-					+ players[playernum].getBall().toString() + ") has won!");
 			view.label.setText("Speler " + players[playernum].getName() + " ("
 					+ players[playernum].getBall().toString() + ") has won!");
 			view.repaint();
 			score[playernum]++;
 
 		} else {
-			System.out.println("Draw. There is no winner!");
 			view.label.setText("Draw. There is no winner!");
 			view.repaint();
 		}
@@ -250,154 +244,47 @@ public class Game extends Observable {
 		takeTurn(i, false);
 	}
 
-	public void takeTurn(int i, boolean fromServer) {
-		int choice = i;
-		boolean valid = board.isField(choice) && board.isEmptyField(choice)
-				&& Validatie.validMove(choice, board, getCurrentPlayer());
-		if (!valid && !fromServer) {//De !fromServer is zodat de game weet dat als het wel op de server toegestaan is, dan wil de client dit ook op zijn bord terugzien.
-			view.label
-					.setText("This is not a valid move. Please try again \nIt's "
-							+ getCurrentPlayer().getName()
-							+ "'s ("
-							+ getCurrentPlayer().getBall() + ") turn.");
-			view.repaint();
-			view.invalidate();
-		} else {
-			if (fromServer || client == null) {
-				board.setField(choice, getCurrentPlayer().getBall());
-				applyRules(i);
-
-				nextPlayer();
-				update();
-				if (board.gameOver()) {
-					printResult();
+	public void takeTurn(int choice, boolean fromServer) {
+//		if (client == null || 
+//				(client.getClientName() !=null && client.getClientName().equals(getCurrentPlayer().getName())) || 
+//				fromServer) {
+//			if (client == null) {
+//				System.out.println("SERVER VOERT UPDATE UIT!");
+//			}
+			boolean valid = board.isField(choice) && board.isEmptyField(choice)
+					&& Validatie.validMove(choice, board, getCurrentPlayer());
+			if (!valid) {
+				view.label
+						.setText("This is not a valid move. Please try again \nIt's "
+								+ getCurrentPlayer().getName()
+								+ "'s ("
+								+ getCurrentPlayer().getBall() + ") turn.");
+				view.repaint();
+				view.invalidate();
+			} else {//Het is een valid move
+				if (fromServer || client == null) {//Is het een commando van de server of is het een lokaal spel? Voer het dan door op het bord
+					board.setField(choice, getCurrentPlayer().getBall());
+					applyRules(choice);
+					nextPlayer();
+					update();
+					if (board.gameOver()) {
+						printResult();
+					}
+				} else {//De client heeft een zet gedaan, stuur dit naar de server.
+					client.sendCommand(RolitControl.doeZet
+							+ RolitConstants.msgDelim + choice); //DIT GAAT NOG GOED!
 				}
-			} else {
-				client.sendCommand(RolitControl.doeZet
-						+ RolitConstants.msgDelim + i);
 			}
-		}
+//		} else {
+//			view.label.setText("It is not your turn. It's "
+//					+ getCurrentPlayer().getName() + "'s ("
+//					+ getCurrentPlayer().getBall() + ") turn.");
+//			view.repaint();
+//			view.invalidate();
+//		}
 	}
-
-	/*
-	 * private Set<Integer> getPossibleTakeOvers(int zet) { /** CAMILIO, KUN JIJ
-	 * DIT TESTEN? Ik heb dit al wel gedaan maar misschien heb jij hier ook nog
-	 * ideeën over -/ Set<Integer> toChange = new HashSet<Integer>(); Ball
-	 * playermark = getCurrentPlayer().getBall(); // Check voor vakje linksboven
-	 * int lbr = board.getRow(zet) - 1; // LinksBovenRow int lbc =
-	 * board.getCol(zet) - 1; // LinksBovenCol while (board.isField(lbr, lbc) &&
-	 * !board.isEmptyField(lbr, lbc)) { if (board.getField(lbr,
-	 * lbc).equals(playermark)) { toChange.add(board.index(lbr, lbc)); break; }
-	 * lbr--; lbc--; } // Check voor vakje boven int br = board.getRow(zet) - 1;
-	 * // BovenRow int bc = board.getCol(zet); // BovenCol while
-	 * (board.isField(br, bc) && !board.isEmptyField(br, bc)) { if
-	 * (board.getField(br, bc).equals(playermark)) {
-	 * toChange.add(board.index(br, bc)); break; } br--; }
-	 * 
-	 * // Check voor vakje rechtsboven
-	 * 
-	 * int rbr = board.getRow(zet) - 1; // RechtsBovenRow int rbc =
-	 * board.getCol(zet) + 1; // LinksBovenCol while (board.isField(rbr, rbc) &&
-	 * !board.isEmptyField(rbr, rbc)) { if (board.getField(rbr,
-	 * rbc).equals(playermark)) { toChange.add(board.index(rbr, rbc)); break; }
-	 * rbr--; rbc++; } // Check voor vakje links
-	 * 
-	 * int lr = board.getRow(zet); // LinksRow int lc = board.getCol(zet) - 1;
-	 * // LinksCol while (board.isField(lr, lc) && !board.isEmptyField(lr, lc))
-	 * { if (board.getField(lr, lc).equals(playermark)) {
-	 * toChange.add(board.index(lr, lc)); break; } lc--; } // Check voor vakje
-	 * rechts
-	 * 
-	 * int rr = board.getRow(zet); // RechtsRow int rc = board.getCol(zet) + 1;
-	 * // RechtsCol while (board.isField(rr, rc) && !board.isEmptyField(rr, rc))
-	 * { if (board.getField(rr, rc).equals(playermark)) {
-	 * toChange.add(board.index(rr, rc)); break; } rc++; } // Check voor vakje
-	 * linksonder
-	 * 
-	 * int lor = board.getRow(zet) + 1; // LinksOnderRow int loc =
-	 * board.getCol(zet) - 1; // LinksOnderCol while (board.isField(lor, loc) &&
-	 * !board.isEmptyField(lor, loc)) { if (board.getField(lor,
-	 * loc).equals(playermark)) { toChange.add(board.index(lor, loc)); break; }
-	 * lor++; loc--; } // Check voor vakje onder
-	 * 
-	 * int or = board.getRow(zet) + 1; // OnderRow int oc = board.getCol(zet);
-	 * // OnderCol while (board.isField(or, oc) && !board.isEmptyField(or, oc))
-	 * { if (board.getField(or, oc).equals(playermark)) {
-	 * toChange.add(board.index(or, oc)); break; } or++; } // Check voor vakje
-	 * rechtsonder
-	 * 
-	 * int ror = board.getRow(zet) + 1; // RechtsOnderRow int roc =
-	 * board.getCol(zet) + 1; // RechtsOnderCol while (board.isField(ror, roc)
-	 * && !board.isEmptyField(ror, roc)) { if (board.getField(ror,
-	 * roc).equals(playermark)) { toChange.add(board.index(ror, roc)); break; }
-	 * ror++; roc++; } // Geef nu alle indexen terug return toChange; }
-	 */
 
 	public Board getBoardCopy() {
 		return board.deepCopy();
 	}
-
-	// public static void main (String[] args){
-	// Game g = new Game(new Player("A", Ball.BLUE), new Player("B", Ball.BLUE),
-	// new Player("C", Ball.BLUE), new Player("D", Ball.BLUE));
-	// for (int i = 0; i<64; i++){
-	// g.board.setField(i, Ball.BLUE);
-	// }
-	// Set<Integer> takeOvers = g.getPossibleTakeOvers(44);
-	// System.out.println(g.board.toString());
-	// System.out.println(Arrays.toString(takeOvers.toArray()));
-	// }
-
-	/*
-	 * private void applyRules(int zet) { //Als er een zet wordt gedaan dan moet
-	 * gecontroleerd worden of er op een van de omliggende vakjes een eigen
-	 * kleur ligt. //Haal eerst de indexen van de vakjes op. System.out.println(
-	 * "__________________________________________________________________");
-	 * System.out.println("Apply rules:"); int[] indexes = new int [8];
-	 * indexes[0] = board.index(board.getRow(zet)-2, board.getCol(zet)-2);
-	 * indexes[1] = board.index(board.getRow(zet)-2, board.getCol(zet));
-	 * indexes[2] = board.index(board.getRow(zet)-2, board.getCol(zet)+2);
-	 * indexes[3] = board.index(board.getRow(zet), board.getCol(zet)-2);
-	 * indexes[4] = board.index(board.getRow(zet), board.getCol(zet)+2);
-	 * indexes[5] = board.index(board.getRow(zet)+2, board.getCol(zet)-2);
-	 * indexes[6] = board.index(board.getRow(zet)+2, board.getCol(zet));
-	 * indexes[7] = board.index(board.getRow(zet)+2, board.getCol(zet)+2);
-	 * 
-	 * System.out.println(Arrays.toString(indexes)); //Kijk nu welke vakjes ook
-	 * echt velden zijn die gevuld zijn met eigen kleur. LinkedList<Integer>
-	 * velden = new LinkedList<Integer>(); for (int i =0; i<indexes.length;
-	 * i++){ if (board.isField(indexes[i]) &&
-	 * board.getField(indexes[i]).equals(getCurrentPlayer().getBall())) { switch
-	 * (i){ case 0: if (board.isField( board.getRow(zet)-1, board.getCol(zet)-1)
-	 * && !board.isEmptyField( board.getRow(zet)-1, board.getCol(zet)-1)) {
-	 * velden.add(board.index(board.getRow(zet)-1, board.getCol(zet)-1)); }
-	 * break; case 1: if (board.isField( board.getRow(zet)-1, board.getCol(zet))
-	 * && !board.isEmptyField( board.getRow(zet)-1, board.getCol(zet))) {
-	 * velden.add(board.index(board.getRow(zet)-1, board.getCol(zet))); } break;
-	 * case 2: if (board.isField( board.getRow(zet)-1, board.getCol(zet)+1) &&
-	 * !board.isEmptyField( board.getRow(zet)-1, board.getCol(zet)+1)) {
-	 * velden.add(board.index(board.getRow(zet)-1, board.getCol(zet)+1)); }
-	 * break; case 3: if (board.isField( board.getRow(zet), board.getCol(zet)-1)
-	 * && !board.isEmptyField( board.getRow(zet), board.getCol(zet)-1)) {
-	 * velden.add(board.index(board.getRow(zet), board.getCol(zet)-1)); } break;
-	 * case 4: if (board.isField( board.getRow(zet), board.getCol(zet)+1) &&
-	 * !board.isEmptyField( board.getRow(zet), board.getCol(zet)+1)) {
-	 * velden.add(board.index(board.getRow(zet), board.getCol(zet)+1)); } break;
-	 * case 5: if (board.isField( board.getRow(zet)+1, board.getCol(zet)-1) &&
-	 * !board.isEmptyField( board.getRow(zet)+1, board.getCol(zet)-1)) {
-	 * velden.add(board.index(board.getRow(zet)+1, board.getCol(zet)-1)); }
-	 * break; case 6: if (board.isField( board.getRow(zet)+1, board.getCol(zet))
-	 * && !board.isEmptyField( board.getRow(zet)+1, board.getCol(zet))) {
-	 * velden.add(board.index(board.getRow(zet)+1, board.getCol(zet))); } break;
-	 * case 7: if (board.isField( board.getRow(zet)+1, board.getCol(zet)+1) &&
-	 * !board.isEmptyField( board.getRow(zet)+1, board.getCol(zet)+1)) {
-	 * velden.add(board.index(board.getRow(zet)+1, board.getCol(zet)+1)); }
-	 * break; } } } System.out.println(Arrays.toString(velden.toArray())); //Nu
-	 * hebben we een lijst met velden die we moeten veranderen naar de kleur van
-	 * de huidige speler for (int i = 0; i<velden.size(); i++){
-	 * board.setField(velden.get(i), getCurrentPlayer().getBall()); }
-	 * System.out.
-	 * println("__________________________________________________________________"
-	 * ); }
-	 */
 }

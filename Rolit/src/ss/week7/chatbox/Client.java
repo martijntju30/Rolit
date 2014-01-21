@@ -11,12 +11,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import project.Ball;
-import project.Game;
-import project.Player;
-import project.RolitConstants;
-import project.RolitControl;
-import project.Rolit_view;
+import project.*;
 
 /**
  * P2 prac wk4. <br>
@@ -42,25 +37,17 @@ public class Client extends Thread {
 			MessageUI muiArg) throws IOException {
 		// Set the Message UI
 		this.mui = muiArg;
+		this.clientName = name;
 		// try to open a Socket to the server
 		try {
 			sock = new Socket(host, port);
 			// create the bufferedreader and writer
-			in = new BufferedReader(
-					new InputStreamReader(sock.getInputStream()));
-			out = new BufferedWriter(new OutputStreamWriter(
-					sock.getOutputStream()));
-			System.out
-					.println("write(RolitControl.speelSpel+name+aantalSpelers"
-							+ (RolitControl.speelSpel + RolitConstants.msgDelim
-									+ name + RolitConstants.msgDelim
-									+ aantalSpelers + "\n"));
-			out.write(RolitControl.speelSpel + RolitConstants.msgDelim + name
-					+ RolitConstants.msgDelim + aantalSpelers + "\n");
+			in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
+			out.write(RolitControl.speelSpel + RolitConstants.msgDelim + name + RolitConstants.msgDelim + aantalSpelers + "\n");
 			out.flush();
 		} catch (IOException e) {
-			mui.addMessage("ERROR: could not create a socket on " + host
-					+ " and port " + port);
+			mui.addMessage("ERROR: could not create a socket on " + host + " and port " + port);
 		}
 	}
 
@@ -71,13 +58,8 @@ public class Client extends Thread {
 	public void run() {
 		try {
 			while (true) {
-
 				String line = in.readLine();
 				HandleCommand(line);
-//				line = applyFilter(line);
-//				if (line != null) {
-//					mui.addMessage(line);
-//				}
 			}
 		} catch (SocketException e) {
 			mui.addMessage("Verbinding verloren");
@@ -104,13 +86,10 @@ public class Client extends Thread {
 	/** send a message to a ClientHandler. */
 	public void sendMessage(String msg) {
 		try {
-			System.out.println("Try to send message: " + msg);
-			out.write(RolitControl.nieuwChatbericht + RolitConstants.msgDelim
-					+ msg + "\n");
+			out.write(RolitControl.nieuwChatbericht + RolitConstants.msgDelim + msg + "\n");
 			out.flush();
 		} catch (IOException e) {
-			mui.addMessage("ERROR: could not send message: " + msg
-					+ ". Please try again!");
+			mui.addMessage("ERROR: could not send message: " + msg + ". Please try again!");
 		}
 	}
 	public void sendCommand(String msg) {
@@ -119,8 +98,7 @@ public class Client extends Thread {
 			out.write(msg+"\n");
 			out.flush();
 		} catch (IOException e) {
-			System.out.println("ERROR: er was een exceptie: " + e.getMessage()
-					+ "\n met een pad: " + Arrays.toString(e.getStackTrace()));
+			System.out.println("ERROR: er was een exceptie: " + e.getMessage() + "\n met een pad: " + Arrays.toString(e.getStackTrace()));
 			shutdown();
 		}
 	}
@@ -141,15 +119,14 @@ public class Client extends Thread {
 
 	public void HandleCommand(String line) throws IOException {
 		System.out
-				.println("Er is een nieuw command aangeroepen om uitgevoerd te worden. \n Dit command is: "
-						+ line);
+				.println("=======================================================\n "
+						+ "Er is een nieuw command aangeroepen om uitgevoerd te worden door de client. \n Dit command is: "
+						+ line+"\n======================================================= ");
 		String[] commandline = line.split(RolitConstants.msgDelim);
 		String command = commandline[0];
 
 		switch (command) {
 		case (RolitControl.beginSpel):
-			System.out.println("--------------------------------------------------------------------------------------------------------------------------------\n "
-					+ "HET COMMAND IS: "+RolitControl.beginSpel);
 			Ball[] kleuren = new Ball[4];
 			Player[] p = new Player[4];
 			kleuren[0] = Ball.RED;
@@ -162,7 +139,6 @@ public class Client extends Thread {
 								kleuren[i-1]);
 			}
 			game = new Game(p[0], p[1], p[2], p[3], this);
-			view = new Rolit_view(game);
 			break;
 
 		case (RolitControl.nieuwChatbericht):
@@ -180,10 +156,14 @@ public class Client extends Thread {
 			game.takeTurn(Integer.parseInt(commandline[1]), true);
 
 		default:
-			out.write(RolitConstants.errorOngeldigCommando);
-			out.flush();
+			sendError(RolitConstants.errorOngeldigCommando);
 			break;
 		}
+	}
+
+	public void sendError(String errormsg) {
+		sendMessage(errormsg);
+		sendCommand(errormsg);
 	}
 
 } // end of class Client

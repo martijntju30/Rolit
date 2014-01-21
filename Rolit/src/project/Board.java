@@ -271,20 +271,15 @@ public class Board {
 		if (isFull()) {
 			// Tel eerst hoeveel ballen iedere speler heeft.
 			int balls_yellow = countBalls(Ball.YELLOW);
-			System.out.println("yellow: "+balls_yellow);
 			int balls_blue = countBalls(Ball.BLUE);
-			System.out.println("blue: "+balls_blue);
 			int balls_green = countBalls(Ball.GREEN);
-			System.out.println("green: "+balls_green);
 			int balls_red = countBalls(Ball.RED);
-			System.out.println("red: "+balls_red);
 
 			int balls_m = countBalls(m);
 
 			// Kijk nu wie de meeste ballen heeft
 			int balls_max = Math.max(Math.max(balls_green, balls_red),
 					Math.max(balls_blue, balls_yellow));
-			System.out.println("max: "+balls_max);
 			return (balls_m == balls_max || !isDraw(balls_yellow, balls_blue, balls_green, balls_red, balls_max));
 		}
 		return false;

@@ -61,7 +61,7 @@ public class ClientHandler extends Thread {
 		if (command.equals(RolitControl.speelSpel)) {
 			clientName = commandline[1];
 			preferredPlayers = Integer.parseInt(commandline[2]);
-			server.broadcast("[" + clientName + " has entered]");
+			server.broadcastMessage("[" + clientName + " has entered]");
 		}
 		return preferredPlayers;
 	}
@@ -76,17 +76,9 @@ public class ClientHandler extends Thread {
 	public void run() {
 		try {
 			while (true) {
-				System.out.println("Waiting for message...");
 				String line = in.readLine();
 				//Er komt een command binnen, voer dit juist uit.
 				HandleCommand(line);
-//				line = ApplyFilter(line);
-//				if (line != null) {
-//					System.out.println("Message found");
-//					server.broadcast(clientName + " says: " + line);
-//
-//					System.out.println("Broadcast!!");
-//				}
 			}
 		} catch (IOException e) {
 			System.out.println("ERROR: er was een exceptie: " + e.getMessage()
@@ -104,7 +96,7 @@ public class ClientHandler extends Thread {
 		case (RolitControl.speelSpel) :
 			clientName = commandline[1];
 			preferredPlayers = Integer.parseInt(commandline[2]);
-			server.broadcast("[" + clientName + " has entered]");
+			server.broadcastMessage("[" + clientName + " has entered]");
 			break;
 		
 		case (RolitControl.nieuwChatbericht):
@@ -113,14 +105,15 @@ public class ClientHandler extends Thread {
 			for (int i=1; i<commandline.length; i++){
 				zin = zin + " " + commandline[i];
 			}
-			server.broadcast(clientName + " says: " + zin);
+			server.broadcastMessage(clientName + " says: " + zin);
 			break;
 		case RolitControl.doeZet:
 			int zet = Integer.parseInt(commandline[1]);
-			if (Validatie.validMove(zet, game.getBoard(), game
-					.getCurrentPlayer())) {
+			System.out.println("De zet is: "+zet);
+			if (Validatie.validMove(zet, game.getBoard(), game.getCurrentPlayer())) {
+				server.broadcastCommand(line);
+				server.broadcastMessage(line+", gezet door "+game.getCurrentPlayer());
 				game.takeTurn(zet, true);
-				server.broadcast(line);
 			}
 			else {
 				sendError(RolitConstants.errorOngeldigeZet);
@@ -145,7 +138,6 @@ public class ClientHandler extends Thread {
 	 */
 	public void sendMessage(String msg) {
 		try {
-			System.out.println("Handler: ik heb een message: " + msg);
 			out.write(RolitControl.nieuwChatbericht+RolitConstants.msgDelim+msg);
 			out.flush();
 		} catch (IOException e) {
@@ -164,9 +156,7 @@ public class ClientHandler extends Thread {
 		try {
 			System.out.println("Handler: ik heb een command: " + msg);
 			out.write(msg+"\n");
-			System.out.println("FLUSSHHHHHH");
 			out.flush();
-			System.out.println("FLUSSHHHHHHED");
 		} catch (IOException e) {
 			System.out.println("ERROR: er was een exceptie: " + e.getMessage()
 					+ "\n met een pad: " + Arrays.toString(e.getStackTrace()));
@@ -181,7 +171,7 @@ public class ClientHandler extends Thread {
 	 */
 	private void shutdown() {
 		server.removeHandler(this);
-		server.broadcast("[" + clientName + " has left]");
+		server.broadcastMessage("[" + clientName + " has left]");
 	}
 
 	protected void setGameID(int gameID2) {

@@ -39,8 +39,8 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 	private JButton bConnect;
 	private JTextField tfHost;
 	private JTextField tfPort;
-	private JTextField tfName;
-	private JTextField tfSpelers;
+	public JTextField tfName;
+	public JTextField tfSpelers;
 	private JTextArea taMessages;
 	private JTextField taMyMessages;
 	private Client Client;

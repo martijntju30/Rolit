@@ -20,15 +20,12 @@ public class Validatie {
 		for (int i = 0; i < indexes.length; i++) {
 			if (board.isField(indexes[i]) && !board.isEmptyField(indexes[i])) {
 				valid = true;
-				System.out.println("Zet: " + zet + " en dit is een vrij veld!");
 			}
 		}
 		boolean allowed = false;
 		// Een move is pas valid als hij overneemt als dit kan.
 		// Haal alle vrije vakjes op.
 		Set<Integer> freeIndexes = getFreeIndexes(board);
-		/** CAMILIO, Klopt wat ik heb gedaan?? *************************************************************************************************************************************************/
-		System.out.println("Dit zijn alle vrije indexen: " + freeIndexes);
 		// Kijk nu bij elke van deze vrije vakjes of deze ervoor zorgen dat ze
 		// een andere blocken. Als dat zo is dat weet je dat er een move is om
 		// anderen te blocken dus moet er geblockt worden
@@ -37,21 +34,13 @@ public class Validatie {
 			Board boardCopy = board.deepCopy();
 			boardCopy.setField(i, player.getBall());
 			if (getPossibleTakeOvers(i, board, player).size() > 0) {
-				System.out
-						.println("De speler kan anderen blokkeren, dit moet hij dus ook doen. Dit kan met de zet "
-								+ i
-								+ ". Dit blokkeert: "
-								+ getPossibleTakeOvers(i, board, player));
 				blockable = true;
 			}
 		}
 		// Kijk nu of de move iets blockt. Als beide ja is, dan is de move
 		// valid.
 		allowed = (getPossibleTakeOvers(zet, board, player).size() > 0 == blockable);
-		System.out.println("Als je de zet " + zet + " doet, dan is dit valid:"
-				+ valid + " en blockable: " + blockable + " en allowed: "
-				+ allowed);
-		// //////////////
+		System.out.println("Validatie: de move ("+zet+") is: "+(valid&&allowed));
 		return valid && allowed;
 
 	}
