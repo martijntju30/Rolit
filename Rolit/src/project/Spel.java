@@ -2,6 +2,12 @@ package project;
 
 import java.io.IOException;
 
+import rolit.Ball;
+import rolit.Game;
+import rolit.Leaderboard;
+import rolit.Player;
+import rolit.Rolit_view;
+
 public class Spel {
 
 	public static void main(String[] args) {

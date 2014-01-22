@@ -1,4 +1,4 @@
-package project;
+package clientEnServer;
 
 /**
  * P2 prac wk4.

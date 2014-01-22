@@ -1,4 +1,4 @@
-package project;
+package clientEnServer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,6 +12,11 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import project.*;
+import rolit.Ball;
+import rolit.Game;
+import rolit.Leaderboard;
+import rolit.Player;
+import rolit.Rolit_view;
 
 /**
  * P2 prac wk4. <br>

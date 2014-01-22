@@ -1,4 +1,4 @@
-package project;
+package clientEnServer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,6 +8,9 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
+
+import rolit.Game;
+import rolit.Validatie;
 
 /**
  * ClientHandler.

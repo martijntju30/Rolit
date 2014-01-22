@@ -1,4 +1,4 @@
-package project;
+package clientEnServer;
 
 import java.io.*;
 import java.net.*;
@@ -7,6 +7,11 @@ import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
 import javax.swing.JFileChooser;
+
+import rolit.Ball;
+import rolit.Game;
+import rolit.Leaderboard;
+import rolit.Player;
 
 /**
  * P2 prac wk5. <br>

@@ -1,4 +1,4 @@
-package project;
+package rolit;
 
 /**
  * Game board for the Tic Tac Toe game. Module 2 lab assignment.

@@ -1,4 +1,4 @@
-package project;
+package rolit;
 
 /**
  * Geeft een object van het balletje.

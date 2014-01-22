@@ -1,4 +1,4 @@
-package project;
+package rolit;
 
 import java.awt.List;
 import java.util.Arrays;
@@ -7,6 +7,10 @@ import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Scanner;
 import java.util.Set;
+
+import clientEnServer.Client;
+import clientEnServer.RolitConstants;
+import clientEnServer.RolitControl;
 
 /**
  * Class for maintaining the Tic Tac Toe game. Lab assignment Module 2

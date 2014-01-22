@@ -1,4 +1,4 @@
-package project;
+package clientEnServer;
 
 /**
  * Alle benodigde constanten.

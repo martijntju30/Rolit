@@ -1,4 +1,4 @@
-package project;
+package clientEnServer;
 /**
  * Protocol voor de te gebruiken commando's tussen server en client.
  * @author Christian Versloot

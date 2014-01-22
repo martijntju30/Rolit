@@ -1,10 +1,14 @@
-package project;
+package rolit;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
 import javax.swing.*;
+
+import clientEnServer.Client;
+import project.StretchIcon;
+import strategie.Strategys;
 
 @SuppressWarnings("serial")
 public class Rolit_view extends JFrame implements Observer, ActionListener {
@@ -200,7 +204,7 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 		ActionEvent e = arg0;
 		if (e.getSource() instanceof JButton) {
 			if (e.getSource() == hint) {
-				int index = Strategys.getRandom(bord, g.getCurrentPlayer());
+				int index = Strategys.smartStrategyForHint(bord, g.getCurrentPlayer());
 				button[index].setBackground(Color.GRAY);
 			} else {
 				String[] chars = arg0.toString().split(" ");

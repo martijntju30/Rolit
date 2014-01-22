@@ -1,4 +1,4 @@
-package project;
+package rolit;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,7 +40,6 @@ public class Validatie {
 		// Kijk nu of de move iets blockt. Als beide ja is, dan is de move
 		// valid.
 		allowed = (getPossibleTakeOvers(zet, board, player).size() > 0 == blockable);
-		System.out.println("Validatie: de move ("+zet+") is: "+(valid&&allowed));
 		return valid && allowed;
 
 	}

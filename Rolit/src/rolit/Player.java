@@ -1,4 +1,4 @@
-package project;
+package rolit;
 
 import java.util.Scanner;
 

@@ -1,5 +1,8 @@
 package project;
 
+import clientEnServer.ClientGUI;
+import clientEnServer.ServerGUI;
+
 
 public class OnlineTest {
 
