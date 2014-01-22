@@ -23,7 +23,7 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 	private JButton[] button = new JButton[bord.DIM * bord.DIM];
 	private JButton hint = new JButton("Hint");
 
-	public Rolit_view(Game g) {
+	public Rolit_view(Game g, Client client) {
 		this.g = g;
 		this.bord = g.getBoard();
 		g.addObserver(this);
@@ -50,6 +50,11 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 		c.setAlignmentX(Component.LEFT_ALIGNMENT);// 0.0
 		label.setAlignmentX(Component.LEFT_ALIGNMENT);// 20.0
 		buildBoard();
+		if (client == null){
+			for (int i = 0; i<button.length; i++){
+				button[i].setEnabled(false);
+			}
+		}
 		setTitle("Rolit");
 		setSize(1000, 1000);
 		setVisible(true);

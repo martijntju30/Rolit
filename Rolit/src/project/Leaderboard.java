@@ -1,10 +1,16 @@
 package project;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Leaderboard {
+public class Leaderboard implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private static Map<Integer, LinkedList<Object>> board = new HashMap<Integer, LinkedList<Object>>();
 
@@ -16,19 +22,22 @@ public class Leaderboard {
 	public Leaderboard() {
 		// Auto-generated constructor stub
 	}
+
 	/**
 	 * Voeg een score toe aan het leaderboard
-	 * @param name de naam van het team/de speler
-	 * @param score de score van het team/de speler
+	 * 
+	 * @param name
+	 *            de naam van het team/de speler
+	 * @param score
+	 *            de score van het team/de speler
 	 */
-	/*@
-	 requires name != null;
-	 requires score != null;
-	 requires score instanceof Comparable;
-	 ensures \old(getBoard()).size() == getBoard().size() + 1;
+	/*
+	 * @ requires name != null; requires score != null; requires score
+	 * instanceof Comparable; ensures \old(getBoard()).size() ==
+	 * getBoard().size() + 1;
 	 */
 	public void add(String name, Object score) {
-		assert name != null && score != null && score instanceof Comparable: "Er was een probleem met het scoretype";
+		assert name != null && score != null && score instanceof Comparable : "Er was een probleem met het scoretype";
 		// Maak de set klaar
 		LinkedList<Object> res = new LinkedList<Object>();
 		res.add(name);
@@ -47,7 +56,7 @@ public class Leaderboard {
 	 * 
 	 * @return het leaderboard
 	 */
-	/*@ pure */public Map<Integer, LinkedList<Object>> getBoard() {
+	/* @ pure */public Map<Integer, LinkedList<Object>> getBoard() {
 		return copy(board);
 	}
 
@@ -57,27 +66,53 @@ public class Leaderboard {
 	 * @param board
 	 *            een board waarvan een weergave moet worden gegeven
 	 */
-	/*@
-	 requires ditboard != null;
+	/*
+	 * @ requires ditboard != null;
 	 */
 	public void showBoard(Map<Integer, LinkedList<Object>> ditboard) {
 		System.out.println("----LEADERBOARD----");
-		System.out.println("+-----"+("ID")+"-----+----"+("Name")+"----+---"+("Score")+"----+----Date----+---Time---+");
+		System.out.println("+-----" + ("ID") + "-----+----" + ("Name")
+				+ "----+---" + ("Score") + "----+----Date----+---Time---+");
 		for (int i = 0; i < ditboard.size(); i++) {
 			Object[] ID = ditboard.keySet().toArray();
 			LinkedList<Object> res = ditboard.get(ID[i]);
 			Object[] res2 = res.toArray();
-			System.out.println("| " + outline(ID[i]) + " | " + outline(res2[NAME]) + " | "
-					+ outline(res2[SCORE]) + " | " + (res2[DATE]) + " | " + (res2[TIME])
-					+ " |");
+			System.out.println("| " + outline(ID[i]) + " | "
+					+ outline(res2[NAME]) + " | " + outline(res2[SCORE])
+					+ " | " + (res2[DATE]) + " | " + (res2[TIME]) + " |");
 		}
+	}
+
+	/**
+	 * Geeft een visuele weergave van een leaderboard dat is meegegeven
+	 * 
+	 * @param board
+	 *            een board waarvan een weergave moet worden gegeven
+	 */
+	/*
+	 * @ requires ditboard != null;
+	 */
+	public Object[] getShowBoard(Map<Integer, LinkedList<Object>> ditboard) {
+		LinkedList<String> res = new LinkedList<String>();
+		res.add("----LEADERBOARD----\n");
+		res.add("+-----" + ("ID") + "-----+----" + ("Name") + "----+---"
+				+ ("Score") + "----+----Date----+---Time---+\n");
+		for (int i = 0; i < ditboard.size(); i++) {
+			Object[] ID = ditboard.keySet().toArray();
+			LinkedList<Object> res1 = ditboard.get(ID[i]);
+			Object[] res2 = res1.toArray();
+			res.add("/ " + outline(ID[i]) + " / " + outline(res2[NAME])
+					+ " / " + outline(res2[SCORE]) + " / " + (res2[DATE])
+					+ " / " + (res2[TIME]) + " /\n");
+		}
+		return res.toArray();
 	}
 
 	/**
 	 * Geeft een visuele weergave van het totale leaderboard
 	 */
-	/*@
-	 
+	/*
+	 * @
 	 */
 	public void showBoard() {
 		showBoard(getBoard());
@@ -90,19 +125,27 @@ public class Leaderboard {
 	 *            het aantal teams dat moet worden weergegeven
 	 * @return een map die je kunt visualiseren met showBoard
 	 */
-	/*@ 
-	 requires topn <= getBoard().size();
+	/*
+	 * @ requires topn <= getBoard().size();
 	 */
 	public Map<Integer, LinkedList<Object>> getHighscore(int topn) {
 		// Om de highscore te vinden moet je de hoogste n scores vinden.
 		// Om die te kunnen vinden moet je de lijst sorteren op score.
-		Map<Integer, LinkedList<Object>> sortedBoard = sort(getBoard());
+		Map<Integer, LinkedList<Object>> sortedBoard = (getBoard());//Hij moet hier worden gesorteerd
 		Map<Integer, LinkedList<Object>> res = new HashMap<Integer, LinkedList<Object>>();
 		Object[] ID = sortedBoard.keySet().toArray();
-		for (int i = 0; i < topn; i++) {
-			// Haal de i-de score op
-			LinkedList<Object> values = sortedBoard.get(ID[i]);
-			res.put((Integer) ID[i], values);
+		if (topn < sortedBoard.size()) {
+			for (int i = 0; i < topn; i++) {
+				// Haal de i-de score op
+				LinkedList<Object> values = sortedBoard.get(ID[i]);
+				res.put((Integer) ID[i], values);
+			}
+		} else {
+			for (int i = 0; i < sortedBoard.size(); i++) {
+				// Haal de i-de score op
+				LinkedList<Object> values = sortedBoard.get(ID[i]);
+				res.put((Integer) ID[i], values);
+			}
 		}
 		return res;
 
@@ -127,12 +170,13 @@ public class Leaderboard {
 															// bovenaan toevoegt
 			LinkedList<Object> value = teSorteren.get(key);
 			if (value != null) {
-				res.put((lengte-i), value);
+				res.put((lengte - i), value);
 			}
 			teSorteren.remove(key);
 		}
 		return res;
 	}
+
 	/**
 	 * Geeft alle scores van iedereen terug die boven een bepaalde score heeft
 	 * gehaald
@@ -176,26 +220,24 @@ public class Leaderboard {
 	 * @param score2
 	 * @return true als het eerste object groter is
 	 */
-	/*@ 
-	 requires object != null; 
-	 requires score2 != null;
-	 requires object instanceof Comparable;
-	 requires score2 instanceof Comparable;
+	/*
+	 * @ requires object != null; requires score2 != null; requires object
+	 * instanceof Comparable; requires score2 instanceof Comparable;
 	 */
 	@SuppressWarnings("unchecked")
 	private boolean isBiggerThan(Object object, Object score2) {
-		assert object != null && score2 != null && object instanceof Comparable && score2 instanceof Comparable: "Er was een probleem met het scoretype";
+		assert object != null && score2 != null && object instanceof Comparable
+				&& score2 instanceof Comparable : "Er was een probleem met het scoretype";
 		if (object != null && score2 == null) {
 			return true;
-		}
-		else if (object == null && score2 != null) {
+		} else if (object == null && score2 != null) {
 			return false;
-		}
-		else if (object == null && score2 == null) {
+		} else if (object == null && score2 == null) {
 			return true;
 		}
 		return ((Comparable<Object>) object).compareTo(score2) > 0;
-		//return (Double.compare(((Number) object).doubleValue(),((Number) score2).doubleValue()) > 0);
+		// return (Double.compare(((Number) object).doubleValue(),((Number)
+		// score2).doubleValue()) > 0);
 	}
 
 	/**
@@ -356,28 +398,43 @@ public class Leaderboard {
 		int res = (int) ID[0];
 		for (int i = 0 + 1; i < teSorteren.size(); i++) {
 			LinkedList<Object> lista = teSorteren.get(ID[i]);
-			LinkedList<Object> listb = teSorteren.get(ID[res]);
+			// LinkedList<Object> listb = teSorteren.get(ID[res]);//
+			LinkedList<Object> listb = teSorteren.get(res);
 			if (isBiggerThan(listb.get(SCORE), lista.get(SCORE)))
 				res = i;
 		}
 		return res;
 	}
-	
-	private String outline (Object text){
+
+	private String outline(Object text) {
 		return String.format("%1$-10s", text);
 	}
 
 	private Map<Integer, LinkedList<Object>> copy(
 			Map<Integer, LinkedList<Object>> toCopy) {
-		
+
 		Map<Integer, LinkedList<Object>> copy = new HashMap<Integer, LinkedList<Object>>();
 		Object[] keyArray = toCopy.keySet().toArray();
-		
-		for (int i=0; i<toCopy.size(); i++) {
+
+		for (int i = 0; i < toCopy.size(); i++) {
 			Object key = keyArray[i];
 			LinkedList<Object> value = toCopy.get(key);
 			copy.put((Integer) key, value);
 		}
 		return copy;
+	}
+
+	public void add(String name, String score, String date, String time) {
+		assert name != null && score != null && score instanceof Comparable : "Er was een probleem met het scoretype";
+		// Maak de set klaar
+		LinkedList<Object> res = new LinkedList<Object>();
+		res.add(name);
+		res.add(score);
+		res.add(date);
+		res.add(time);
+
+		// Gooi dit nu in het leaderboard op een nieuw ID.
+		int ID = board.keySet().toArray().length;
+		board.put(ID, res);
 	}
 }

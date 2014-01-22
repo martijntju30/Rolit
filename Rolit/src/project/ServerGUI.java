@@ -8,8 +8,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -22,7 +25,8 @@ import javax.swing.ScrollPaneConstants;
 
 /**
  * ServerGui. A GUI for the Server.
- * @author  Theo Ruys
+ * 
+ * @author Theo Ruys
  * @version 2005.02.21
  */
 public class ServerGUI extends JFrame implements ActionListener, MessageUI {
@@ -32,6 +36,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	private JTextArea taMessages;
 	private Server server;
 	private Game game;
+	private JButton showLeaderboard;
 
 	/** Constructs a ServerGUI object. */
 	public ServerGUI() {
@@ -44,7 +49,13 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 			public void windowClosing(WindowEvent e) {
 				e.getWindow().dispose();
 			}
+
 			public void windowClosed(WindowEvent e) {
+				boolean leaderboardSaved = !Server.useFileLeaderboard;
+				if (server != null && server.leaderboard != null)
+				while (!leaderboardSaved) {
+					leaderboardSaved = server.saveLeaderboard();
+				}
 				System.exit(0);
 			}
 		});
@@ -73,9 +84,13 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 
 		bConnect = new JButton("Start Listening");
 		bConnect.addActionListener(this);
+		showLeaderboard = new JButton("Show leaderboard");
+		showLeaderboard.addActionListener(this);
+		showLeaderboard.setEnabled(false);
 
 		p1.add(pp, BorderLayout.WEST);
 		p1.add(bConnect, BorderLayout.EAST);
+		p1.add(showLeaderboard, BorderLayout.EAST);
 
 		// Panel p2 - Messages
 
@@ -87,7 +102,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		taMessages.setEditable(false);
 		p2.add(lbMessages);
 		JScrollPane scroll = new JScrollPane(taMessages);
-	    scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		p2.add(scroll, BorderLayout.SOUTH);
 
 		Container cc = getContentPane();
@@ -114,10 +129,22 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		if (src == bConnect) {
 			startListening();
 		}
+		else if (src == showLeaderboard){
+			if (server != null && server.leaderboard != null) {
+				Object[] bord = server.leaderboard.getShowBoard(server.leaderboard.getHighscore(3));
+				String res = "";
+				for (Object regel:bord){
+					res = res +""+regel;
+				}
+				addMessage(res);
+			}
+			
+		}
 	}
 
 	/**
-	 * Construct a Server-object, which is waiting for clients. The port field and button should be disabled
+	 * Construct a Server-object, which is waiting for clients. The port field
+	 * and button should be disabled
 	 */
 	private void startListening() {
 		int port = 0;
@@ -132,16 +159,29 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 
 		tfPort.setEditable(false);
 		bConnect.setEnabled(false);
+		showLeaderboard.setEnabled(true);
 
-		server = new Server(port, this);
+		try {
+			server = new Server(port, this);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		server.start();
 
 		addMessage("Started listening on port " + port + "...");
-		//De server en chatbox zijn nu gestart, start nu ook begin voor de game.
+		// De server en chatbox zijn nu gestart, start nu ook begin voor de
+		// game.
 		server.HandleRolitGame();
 	}
 
-	/** add a message to the textarea  */
+	/** add a message to the textarea */
 	public void addMessage(String msg) {
 		taMessages.append(msg + "\n");
 	}

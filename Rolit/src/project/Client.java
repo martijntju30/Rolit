@@ -151,7 +151,7 @@ public class Client extends Thread {
 					clientKleur = p[i-1].getBall();
 				}
 			}
-			game = new Game(p[0], p[1], p[2], p[3], this);
+			game = new Game(p[0], p[1], p[2], p[3], this, new Leaderboard());
 			view = game.view;
 			view.kleur.setText("Your color: "+clientKleur.toString());
 			view.invalidate();
@@ -171,6 +171,16 @@ public class Client extends Thread {
 			System.out.println(clientName + ": Er wordt een zet gedaan..... "
 					+ commandline[1]);
 			game.takeTurn(Integer.parseInt(commandline[1]), true);
+			break;
+
+			
+		case RolitConstants.errorAantalSpelersOngeldig:
+		case RolitConstants.errorGebruikersnaamInGebruik:
+		case RolitConstants.errorOngeldigeGebruikersnaam:
+			((ClientGUI)mui).resetInvoer();
+			break;
+		case RolitConstants.errorOngeldigCommando:
+		case RolitConstants.errorOngeldigeZet:
 			break;
 
 		default:

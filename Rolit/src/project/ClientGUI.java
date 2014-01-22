@@ -225,6 +225,18 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 	public static void main(String[] args) {
 		ClientGUI gui = new ClientGUI();
 	}
+	
+	public void resetInvoer() {
+		tfHost.setEditable(true);
+		tfHost.setEnabled(true);
+		tfPort.setEditable(true);
+		tfPort.setEnabled(true);
+		tfName.setEditable(true);
+		tfName.setEnabled(true);
+		tfSpelers.setEditable(true);
+		tfSpelers.setEnabled(true);
+		bConnect.setEnabled(true);
+	}
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {

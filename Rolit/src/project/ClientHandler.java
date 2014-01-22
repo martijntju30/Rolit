@@ -21,10 +21,10 @@ public class ClientHandler extends Thread {
 	private Socket sock;
 	private BufferedReader in;
 	private BufferedWriter out;
-	private String clientName;
+	protected String clientName;
 	public int gameID;
 	public Game game;
-	private int preferredPlayers;
+	protected int preferredPlayers;
 
 	/**
 	 * Constructs a ClientHandler object Initialises both Data streams. @
@@ -57,7 +57,13 @@ public class ClientHandler extends Thread {
 		if (command.equals(RolitControl.speelSpel)) {
 			clientName = commandline[1];
 			preferredPlayers = Integer.parseInt(commandline[2]);
+			boolean isValid = server.validate(this);
+			if (isValid) {
 			server.broadcastMessage("[" + clientName + " has entered]");
+			}
+			else {
+				sendError(RolitConstants.errorGebruikersnaamInGebruik);
+			}
 		}
 		return preferredPlayers;
 	}
@@ -119,14 +125,20 @@ public class ClientHandler extends Thread {
 				sendError(RolitConstants.errorOngeldigeZet);
 			}
 			break;
-
+		
+		case RolitConstants.errorAantalSpelersOngeldig:
+		case RolitConstants.errorGebruikersnaamInGebruik:
+		case RolitConstants.errorOngeldigCommando:
+		case RolitConstants.errorOngeldigeGebruikersnaam:
+		case RolitConstants.errorOngeldigeZet:
+			break;
 		default:
 			sendError(RolitConstants.errorOngeldigCommando);
 			break;
 		}
 	}
 
-	private void sendError(String errormsg) {
+	public void sendError(String errormsg) {
 		sendMessage(errormsg);
 		sendCommand(errormsg);
 	}

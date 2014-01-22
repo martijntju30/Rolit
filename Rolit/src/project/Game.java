@@ -39,7 +39,7 @@ public class Game extends Observable {
 	private Player[] players;
 	private int[] score;
 
-	private Leaderboard leaderboard = new Leaderboard();
+	private Leaderboard leaderboard;
 
 	/*
 	 * @ private invariant 0 <= current && current < NUMBER_PLAYERS;
@@ -63,8 +63,10 @@ public class Game extends Observable {
 	 * @param s1
 	 *            the second player
 	 */
-	public Game(Player s0, Player s1, Player s2, Player s3, Client client) {
+	public Game(Player s0, Player s1, Player s2, Player s3, Client client,
+			Leaderboard leaderboard) {
 		this.client = client;
+		this.leaderboard = leaderboard;
 		board = new Board();
 		if (s0 != null && !s0.getName().equals("null")) {
 			NUMBER_PLAYERS++;
@@ -95,9 +97,9 @@ public class Game extends Observable {
 		}
 
 		current = 0;
-		if (client != null) {
-			view = new Rolit_view(this);
-		}
+		//if (client != null) {
+			view = new Rolit_view(this, client);
+		//}
 	}
 
 	// -- Commands ---------------------------------------------------
@@ -114,12 +116,6 @@ public class Game extends Observable {
 			play();
 			doorgaan = readBoolean("\n> Play another time? (y/n)?", "y", "n");
 		}
-
-		leaderboard.add(players[0].getName(), score[0]);
-		leaderboard.add(players[1].getName(), score[1]);
-		leaderboard.add(players[2].getName(), score[2]);
-		leaderboard.add(players[3].getName(), score[3]);
-		leaderboard.showBoard();
 	}
 
 	/**
@@ -212,11 +208,21 @@ public class Game extends Observable {
 			view.label.setText("Speler " + players[playernum].getName() + " ("
 					+ players[playernum].getBall().toString() + ") has won!");
 			view.repaint();
-			score[playernum]++;
 
 		} else {
 			view.label.setText("Draw. There is no winner!");
 			view.repaint();
+		}
+		if (client == null) {
+			System.out.println("De server zal nu de scores aan de highscore toevoegen");
+			for (int i = 0; i < NUMBER_PLAYERS; i++) {
+				leaderboard.add(players[i].getName(),
+						board.countBalls(players[i].getBall()));
+				score[i] = board.countBalls(players[i].getBall());
+				leaderboard.showBoard();
+			}
+			view.invalidate();
+			System.out.println("De server is klaar");
 		}
 	}
 
@@ -243,12 +249,9 @@ public class Game extends Observable {
 	}
 
 	public void takeTurn(int choice, boolean fromServer) {
-		if (client == null || 
-				(client.getClientName() !=null && client.getClientName().equals(getCurrentPlayer().getName())) || 
-				fromServer) {
-			if (client == null) {
-				System.out.println("SERVER VOERT UPDATE UIT!");
-			}
+		if (client == null
+				|| (client.getClientName() != null && client.getClientName()
+						.equals(getCurrentPlayer().getName())) || fromServer) {
 			boolean valid = board.isField(choice) && board.isEmptyField(choice)
 					&& Validatie.validMove(choice, board, getCurrentPlayer());
 			if (!valid) {
@@ -259,8 +262,11 @@ public class Game extends Observable {
 								+ getCurrentPlayer().getBall() + ") turn.");
 				view.repaint();
 				view.invalidate();
-			} else {//Het is een valid move
-				if (fromServer || client == null) {//Is het een commando van de server of is het een lokaal spel? Voer het dan door op het bord
+			} else {// Het is een valid move
+				if (fromServer || client == null) {// Is het een commando van de
+													// server of is het een
+													// lokaal spel? Voer het dan
+													// door op het bord
 					board.setField(choice, getCurrentPlayer().getBall());
 					applyRules(choice);
 					nextPlayer();
@@ -268,9 +274,10 @@ public class Game extends Observable {
 					if (board.gameOver()) {
 						printResult();
 					}
-				} else {//De client heeft een zet gedaan, stuur dit naar de server.
+				} else {// De client heeft een zet gedaan, stuur dit naar de
+						// server.
 					client.sendCommand(RolitControl.doeZet
-							+ RolitConstants.msgDelim + choice); //DIT GAAT NOG GOED!
+							+ RolitConstants.msgDelim + choice);
 					return;
 				}
 			}

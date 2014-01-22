@@ -302,7 +302,7 @@ public class Board {
 		return false;
 	}
 
-	private int countBalls(Ball m) {
+	public int countBalls(Ball m) {
 		// Ga alle velden langs en kijk of het een bal van m is
 		int counter = 0;
 		for (int i = 0; i < (fields.length); i++) {
