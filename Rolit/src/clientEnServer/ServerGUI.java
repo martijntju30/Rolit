@@ -39,6 +39,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	private Server server;
 	private Game game;
 	private JButton showLeaderboard;
+	private JButton addAI;
 
 	/** Constructs a ServerGUI object. */
 	public ServerGUI() {
@@ -89,11 +90,16 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		showLeaderboard = new JButton("Show leaderboard");
 		showLeaderboard.addActionListener(this);
 		showLeaderboard.setEnabled(false);
+		addAI = new JButton("Add AI");
+		addAI.addActionListener(this);
+		addAI.setEnabled(false);
 
 		p1.add(pp, BorderLayout.WEST);
 		p1.add(bConnect, BorderLayout.EAST);
 		p1.add(showLeaderboard, BorderLayout.EAST);
-
+		//p1.add(addAI, BorderLayout.SOUTH);
+		//p1.add(buttons, BorderLayout.EAST);
+		
 		// Panel p2 - Messages
 
 		JPanel p2 = new JPanel();
@@ -139,6 +145,13 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 					res = res +""+regel;
 				}
 				addMessage(res);
+			}
+			
+		}
+		else if (src == addAI){
+			if (server != null) {
+				System.out.println("============================\n Dit werkt nog niet \n ========================");
+				addMessage("============================\n Dit werkt nog niet \n ========================");
 			}
 			
 		}

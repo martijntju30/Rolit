@@ -17,12 +17,7 @@ public class Spel {
 			Player p3 = new Player("p3", Ball.GREEN);
 			//Player p4 = new Player("p4", Ball.RED);
 			Game gam = new Game(p1, p2, p3, null, null, new Leaderboard());
-			try {
-				new Rolit_view(gam);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			new Rolit_view(gam, null);
 			gam.start();
 		}
 }

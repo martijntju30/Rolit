@@ -8,6 +8,7 @@ import java.util.Observable;
 import java.util.Scanner;
 import java.util.Set;
 
+import strategie.SmartStrategy;
 import clientEnServer.Client;
 import clientEnServer.RolitConstants;
 import clientEnServer.RolitControl;
@@ -31,7 +32,7 @@ public class Game extends Observable {
 	 * The board.
 	 */
 	private Board board;
-	protected Rolit_view view;
+	public Rolit_view view;
 
 	/*
 	 * @ private invariant players.length == NUMBER_PLAYERS; private (\forall
@@ -88,22 +89,47 @@ public class Game extends Observable {
 		players = new Player[NUMBER_PLAYERS];
 		score = new int[NUMBER_PLAYERS];
 		if (s0 != null && !s0.getName().equals("null")) {
-			players[0] = s0;
+			if (s0.getName().startsWith("ai_")){
+				players[0] = new SmartStrategy(s0.getName(), s0.getBall());
+				this.addObserver((SmartStrategy) players[0]);
+			}
+			else {
+				players[0] = s0;
+			}
 		}
 		if (s1 != null && !s1.getName().equals("null")) {
-			players[1] = s1;
+			if (s1.getName().startsWith("ai_")){
+				players[1] = new SmartStrategy(s1.getName(), s1.getBall());
+				this.addObserver((SmartStrategy) players[1]);
+			}
+			else {
+				players[1] = s1;
+			}
 		}
 		if (s2 != null && !s2.getName().equals("null")) {
-			players[2] = s2;
+			if (s2.getName().startsWith("ai_")){
+				players[2] = new SmartStrategy(s2.getName(), s2.getBall());
+				this.addObserver((SmartStrategy) players[2]);
+			}
+			else {
+				players[2] = s2;
+			}
 		}
 		if (s3 != null && !s3.getName().equals("null")) {
-			players[3] = s3;
+			if (s3.getName().startsWith("ai_")){
+				players[3] = new SmartStrategy(s3.getName(), s3.getBall());
+				this.addObserver((SmartStrategy) players[3]);
+			}
+			else {
+				players[3] = s3;
+			}
 		}
 
 		current = 0;
 		//if (client != null) {
 			view = new Rolit_view(this, client);
 		//}
+		update();
 	}
 
 	// -- Commands ---------------------------------------------------
@@ -178,6 +204,8 @@ public class Game extends Observable {
 
 	protected void nextPlayer() {
 		current = (current + 1) % NUMBER_PLAYERS;
+		this.setChanged();
+		this.notifyObservers(current+"");
 	}
 
 	// E{Spel.play}
@@ -185,7 +213,7 @@ public class Game extends Observable {
 	/**
 	 * Prints the game situation.
 	 */
-	private void update() {
+	public void update() {
 		this.setChanged();
 		this.notifyObservers();
 	}

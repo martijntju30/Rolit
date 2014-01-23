@@ -115,8 +115,10 @@ public class Player {
      *            the current board
      */
     public void makeMove(Board board, Game game) {
+    	if (game.getCurrentPlayer() == this){
         int keuze = determineMove(board);
         game.takeTurn(keuze);
+    	}
     }
     
     public String toString(){

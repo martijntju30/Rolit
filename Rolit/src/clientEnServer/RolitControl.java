@@ -1,8 +1,10 @@
 package clientEnServer;
+
+
 /**
  * Protocol voor de te gebruiken commando's tussen server en client.
  * @author Christian Versloot
- * @version 1.0 (13/01/2014)
+ * @version 1.1 (16/01/2014)
  * 
  * Richting beschrijving:
  * [C] = Client
@@ -27,6 +29,22 @@ package clientEnServer;
  *
  */
 public interface RolitControl {
+	/**
+	 * Vraag om een nonce.
+	 * Richting: [S] -> [C]
+	 * @param het woord waarmee geverifieerd moet worden.
+	 * @return sign met een signature
+	 */
+	String nonce = "nonce";
+	
+	/**
+	 * Stuur een signature terug.
+	 * Richting: [C] -> [S]
+	 * @param de signature
+	 * @return welkom - welkomst commando met resterend aantal spelers
+	 * @return error - error commando met errorType (ongeldige Gebruikersnaam of ongeldige Signature)
+	 */
+	String sign = "sign";
 	
 	/**
 	 * Stuur een foutmelding naar de client.
@@ -54,8 +72,7 @@ public interface RolitControl {
 	 * Richting: [C] -> [S]
 	 * @param naam - je naam
 	 * @param aantalSpelers - het aantal spelers waarmee je wilt spelen.
-	 * @return welkom - welkomst commando met resterend aantal spelers
-	 * @return error - error commando met errorType
+	 * @return nonce met daarin het te noncen woord.
 	 */
 	String speelSpel = "speelSpel";
 	

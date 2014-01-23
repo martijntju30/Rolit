@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -42,6 +43,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 	private JTextField tfHost;
 	private JTextField tfPort;
 	public JTextField tfName;
+	public JPasswordField tfPass;
 	public JTextField tfSpelers;
 	private JTextArea taMessages;
 	private JTextField taMyMessages;
@@ -72,7 +74,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		// Panel p1 - Listen
 
 		JPanel p1 = new JPanel(new FlowLayout());
-		JPanel pp = new JPanel(new GridLayout(4, 4));
+		JPanel pp = new JPanel(new GridLayout(5, 4));
 
 		JLabel lbHost = new JLabel("Hostname: ");
 		tfHost = new JTextField(getHostAddress(), 12);
@@ -85,9 +87,13 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		tfPort.getDocument().addDocumentListener(this);
 		tfPort.addActionListener(this);
 		JLabel lbName = new JLabel("Name:");
-		tfName = new JTextField("", 15);
+		tfName = new JTextField("player_", 15);
 		tfName.getDocument().addDocumentListener(this);
 		tfName.addActionListener(this);
+		JLabel lbPass = new JLabel("Password:");
+		tfPass = new JPasswordField("", 15);
+		tfPass.getDocument().addDocumentListener(this);
+		tfPass.addActionListener(this);
 		JLabel lbSpelers = new JLabel("Aantal spelers:");
 		tfSpelers = new JTextField("", 15);
 		tfSpelers.getDocument().addDocumentListener(this);
@@ -99,6 +105,8 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		pp.add(tfPort);
 		pp.add(lbName);
 		pp.add(tfName);
+		pp.add(lbPass);
+		pp.add(tfPass);
 		pp.add(lbSpelers);
 		pp.add(tfSpelers);
 
@@ -181,6 +189,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 			e1.printStackTrace();
 		}
 		String name = "No Name";
+		String pass = "No Pass";
 		int spelers = 4;
 		int max = 0;
 
@@ -188,6 +197,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 			port = Integer.parseInt(tfPort.getText());
 			host = InetAddress.getByName(tfHost.getText());
 			name = tfName.getText();
+			pass = new String(tfPass.getPassword());
 			spelers = Integer.parseInt(tfSpelers.getText());
 		} catch (NumberFormatException e) {
 			addMessage("ERROR: not a valid portnumber!");
@@ -200,12 +210,14 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		tfPort.setEditable(false);
 		tfHost.setEditable(false);
 		tfName.setEditable(false);
+		tfPass.setEditable(false);
 		tfSpelers.setEditable(false);
+		taMyMessages.setEnabled(true);
 		taMyMessages.setEditable(true);
 		bConnect.setEnabled(false);
 
 		try {
-			Client = new Client(name, spelers, host, port, this);
+			Client = new Client(name, pass, spelers, host, port, this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -233,9 +245,14 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		tfPort.setEnabled(true);
 		tfName.setEditable(true);
 		tfName.setEnabled(true);
+		tfPass.setEditable(true);
+		tfPass.setEnabled(true);
 		tfSpelers.setEditable(true);
 		tfSpelers.setEnabled(true);
 		bConnect.setEnabled(true);
+		taMyMessages.setEditable(false);
+		taMyMessages.setEnabled(false);
+		Client.shutdown();
 	}
 
 	@Override
@@ -257,9 +274,11 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		Object src = e.getDocument();
 		if (src == tfHost.getDocument() || src == tfPort.getDocument()
 				|| src == tfName.getDocument()
+						|| src == tfPass.getDocument()
 				|| src == tfSpelers.getDocument()) {
 			if (!tfHost.getText().equals("") && !tfPort.getText().equals("")
 					&& !tfName.getText().equals("")
+					&& !tfPass.getPassword().equals("")
 					&& !tfSpelers.getText().equals("")
 					&& !(Integer.parseInt(tfPort.getText()) <= 0)
 					&& !(Integer.parseInt(tfSpelers.getText()) <= 1)

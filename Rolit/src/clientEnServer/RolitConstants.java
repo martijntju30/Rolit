@@ -1,9 +1,10 @@
 package clientEnServer;
 
+
 /**
  * Alle benodigde constanten.
  * @author Christian Versloot
- * @version 1.0 (13/01/2014)
+ * @version 1.1 (16/01/2014)
  * 
  * [C] = Client
  * [S] = Server
@@ -55,6 +56,6 @@ public interface RolitConstants {
 	String errorOngeldigCommando = "ongeldigCommando";
 	String errorGebruikersnaamInGebruik = "gebruikersnaamInGebruik";
 	String errorAantalSpelersOngeldig = "aantalSpelersOngeldig";
-	String errorSpelVol = "SpelVol";
+	String errorOngeldigeSignature = "ongeldigeSignature";
 
 }

@@ -189,6 +189,7 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 	@Override
 	public void update(Observable arg0, Object arg1) {
 		if (arg0 != null) {
+			System.out.println("Het bord moet worden geüpdate");
 			// Het label wie aan de beurt is.
 			Player currentplayer = g.getCurrentPlayer();
 			label.setText("It's " + currentplayer.getName() + "'s ("

@@ -7,6 +7,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import rolit.Game;
@@ -28,6 +33,10 @@ public class ClientHandler extends Thread {
 	public int gameID;
 	public Game game;
 	protected int preferredPlayers;
+	private String nonce;
+	private PublicKey pubkey;
+	public boolean authenticatie = false;
+	private boolean doorgaan = true;
 
 	/**
 	 * Constructs a ClientHandler object Initialises both Data streams. @
@@ -54,19 +63,12 @@ public class ClientHandler extends Thread {
 	 * @return
 	 */
 	public int announce() throws IOException {
-		String commandlineString = in.readLine();
-		String[] commandline = commandlineString.split(RolitConstants.msgDelim);
-		Object command = commandline[0];
-		if (command.equals(RolitControl.speelSpel)) {
-			clientName = commandline[1];
-			preferredPlayers = Integer.parseInt(commandline[2]);
-			boolean isValid = server.validate(this);
-			if (isValid) {
+		boolean isValid = server.validate(this);
+		if (isValid) {
 			server.broadcastMessage("[" + clientName + " has entered]");
-			}
-			else {
-				sendError(RolitConstants.errorGebruikersnaamInGebruik);
-			}
+		} else {
+			sendError(RolitConstants.errorGebruikersnaamInGebruik);
+			shutdown();
 		}
 		return preferredPlayers;
 	}
@@ -80,11 +82,17 @@ public class ClientHandler extends Thread {
 	 */
 	public void run() {
 		try {
-			while (true) {
-				String line = in.readLine();
-				// Er komt een command binnen, voer dit juist uit.
-				HandleCommand(line);
+			while (doorgaan) {
+				if (sock.isClosed() || !sock.isConnected()) {
+					System.out.println("Socket is closed");
+					shutdown();
+				} else {
+					String line = in.readLine();
+					// Er komt een command binnen, voer dit juist uit.
+					HandleCommand(line);
+				}
 			}
+			shutdown();
 		} catch (IOException e) {
 			System.out.println("ERROR: er was een exceptie: " + e.getMessage()
 					+ "\n met een pad: " + e.getStackTrace());
@@ -102,10 +110,42 @@ public class ClientHandler extends Thread {
 		String command = commandline[0];
 		server.addMessage(line);
 		switch (command) {
+		case (RolitControl.sign):
+			try {
+				pubkey = Authentication.getPublickey(clientName);
+				String sign = commandline[1];
+				System.out.println("SIGN = " + new String(sign));
+				if (Authentication.decodesignatur(sign, nonce, pubkey)) {
+					this.authenticatie = true;
+					announce();
+					break;
+				} else {
+					shutdown();
+				}
+			} catch (InvalidKeyException | InvalidKeySpecException
+					| NoSuchAlgorithmException | SignatureException e) {
+				e.printStackTrace();
+				shutdown();
+			}
+			shutdown();
+			break;
 		case (RolitControl.speelSpel):
 			clientName = commandline[1];
 			preferredPlayers = Integer.parseInt(commandline[2]);
-			server.broadcastMessage("[" + clientName + " has entered]");
+			if (clientName.startsWith("ai_")) {
+				this.authenticatie = true;
+				announce();
+			} else {
+				try {
+					nonce = Authentication.makenonce();
+					sendCommand(RolitControl.nonce + RolitConstants.msgDelim
+							+ nonce);
+				} catch (NoSuchAlgorithmException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				// server.broadcastMessage("[" + clientName + " has entered]");
+			}
 			break;
 
 		case (RolitControl.nieuwChatbericht):
@@ -119,16 +159,17 @@ public class ClientHandler extends Thread {
 			break;
 		case RolitControl.doeZet:
 			int zet = Integer.parseInt(commandline[1]);
-			System.out.println("De zet is: " + zet);
+			System.out.println("=====De zet is: " + zet);
 			if (Validatie.validMove(zet, game.getBoard(),
 					game.getCurrentPlayer())) {
 				server.broadcastCommand(line, gameID);
+				System.out.println("DOE BROADCAST VAN ZET");
 				game.takeTurn(zet, true);
 			} else {
 				sendError(RolitConstants.errorOngeldigeZet);
 			}
 			break;
-		
+
 		case RolitConstants.errorAantalSpelersOngeldig:
 		case RolitConstants.errorGebruikersnaamInGebruik:
 		case RolitConstants.errorOngeldigCommando:
@@ -155,7 +196,7 @@ public class ClientHandler extends Thread {
 		try {
 			if (msg != null && !msg.equals("") && !msg.equals(" ")) {
 				out.write(RolitControl.nieuwChatbericht
-						+ RolitConstants.msgDelim + msg+"\n");
+						+ RolitConstants.msgDelim + msg + "\n");
 				out.flush();
 			}
 		} catch (IOException e) {
@@ -190,8 +231,12 @@ public class ClientHandler extends Thread {
 	 * participating in the chat.
 	 */
 	private void shutdown() {
+		System.out.println("Remove thread");
 		server.removeHandler(this);
+		// if (this.authenticatie){
 		server.broadcastMessage("[" + clientName + " has left]");
+		// }
+		doorgaan = false;
 	}
 
 	protected void setGameID(int gameID2) {

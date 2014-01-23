@@ -9,6 +9,11 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import project.*;
@@ -35,17 +40,22 @@ public class Client extends Thread {
 	private Game game;
 	private Rolit_view view;
 	private Ball clientKleur;
+	private PrivateKey privkey;
+	private boolean doorgaan = true;
 
 	/**
 	 * Constructs a Client-object and tries to make a socket connection
 	 */
-	public Client(String name, int aantalSpelers, InetAddress host, int port,
+	public Client(String name, String pass, int aantalSpelers, InetAddress host, int port,
 			MessageUI muiArg) throws IOException {
 		// Set the Message UI
 		this.mui = muiArg;
 		this.clientName = name;
 		// try to open a Socket to the server
 		try {
+			privkey = Authentication.getPrivateKey(name,
+					pass);
+			if (privkey != null || name.startsWith("ai_")) {
 			sock = new Socket(host, port);
 			// create the bufferedreader and writer
 			in = new BufferedReader(
@@ -55,7 +65,13 @@ public class Client extends Thread {
 			out.write(RolitControl.speelSpel + RolitConstants.msgDelim + name
 					+ RolitConstants.msgDelim + aantalSpelers + "\n");
 			out.flush();
-		} catch (IOException e) {
+			}
+			else {
+				mui.addMessage("The username and password are incorrect");
+				((ClientGUI) mui).resetInvoer();
+			}
+		} catch (IOException | NoSuchAlgorithmException
+				| InvalidKeySpecException e) {
 			mui.addMessage("ERROR: could not create a socket on " + host
 					+ " and port " + port);
 		}
@@ -67,29 +83,18 @@ public class Client extends Thread {
 	 */
 	public void run() {
 		try {
-			while (true) {
+			while (doorgaan) {
 				String line = in.readLine();
 				HandleCommand(line);
 			}
+			shutdown();
 		} catch (SocketException e) {
 			mui.addMessage("Verbinding verloren");
+			shutdown();
 		} catch (IOException e) {
 			mui.addMessage("ERROR: er was een exceptie: " + e.getMessage()
 					+ "\n met een pad: " + e.getStackTrace());
-		}
-	}
-
-	private String applyFilter(String line) {
-		String[] parts = line.split(" ");
-		String command = parts[0];
-		if (command.equals(RolitControl.nieuwChatbericht)) {
-			String zin = "";
-			for (int i = 1; i < parts.length; i++) {
-				zin = zin + " " + parts[i];
-			}
-			return zin;
-		} else {
-			return null;
+			shutdown();
 		}
 	}
 
@@ -104,6 +109,7 @@ public class Client extends Thread {
 		} catch (IOException e) {
 			mui.addMessage("ERROR: could not send message: " + msg
 					+ ". Please try again!");
+			shutdown();
 		}
 	}
 
@@ -122,8 +128,10 @@ public class Client extends Thread {
 	}
 
 	/** close the socket connection. */
-	public void shutdown() {
+	public void shutdown() {///Dit moet goed doen..
 		try {
+			System.out.println("Shutdown client");
+			doorgaan = false;
 			sock.close();
 		} catch (IOException e) {
 			mui.addMessage("ERROR: could not close socketconnection.");
@@ -143,6 +151,23 @@ public class Client extends Thread {
 		String command = commandline[0];
 
 		switch (command) {
+		case (RolitControl.nonce):
+			try {
+				String sign = Authentication.signatur(commandline[1], privkey);
+				if (sign == null){
+					mui.addMessage("The username and password are incorrect");
+					((ClientGUI) mui).resetInvoer();
+					shutdown();
+				}
+				sendCommand(RolitControl.sign + RolitConstants.msgDelim+ sign);
+				
+			} catch (InvalidKeyException | NoSuchAlgorithmException
+					| SignatureException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			break;
 		case (RolitControl.beginSpel):
 			Ball[] kleuren = new Ball[4];
 			Player[] p = new Player[4];
@@ -153,12 +178,12 @@ public class Client extends Thread {
 			for (int i = 1; i < commandline.length; i++) {
 				p[i - 1] = new Player(commandline[i], kleuren[i - 1]);
 				if (commandline[i].equals(clientName)) {
-					clientKleur = p[i-1].getBall();
+					clientKleur = p[i - 1].getBall();
 				}
 			}
 			game = new Game(p[0], p[1], p[2], p[3], this, new Leaderboard());
 			view = game.view;
-			view.kleur.setText("Your color: "+clientKleur.toString());
+			view.kleur.setText("Your color: " + clientKleur.toString());
 			view.invalidate();
 			break;
 
@@ -178,11 +203,10 @@ public class Client extends Thread {
 			game.takeTurn(Integer.parseInt(commandline[1]), true);
 			break;
 
-			
 		case RolitConstants.errorAantalSpelersOngeldig:
 		case RolitConstants.errorGebruikersnaamInGebruik:
 		case RolitConstants.errorOngeldigeGebruikersnaam:
-			((ClientGUI)mui).resetInvoer();
+			((ClientGUI) mui).resetInvoer();
 			break;
 		case RolitConstants.errorOngeldigCommando:
 		case RolitConstants.errorOngeldigeZet:

@@ -33,7 +33,7 @@ public class Server extends Thread {
 	private Set<ClientHandler> playersFor4 = new HashSet<ClientHandler>();
 	private File leaderboardFile;
 
-	public static final boolean useFileLeaderboard = true;
+	public static final boolean useFileLeaderboard = false;
 
 	/**
 	 * Constructs a new Server object
@@ -224,18 +224,14 @@ public class Server extends Thread {
 	 */
 	public void broadcastMessage(String msg) {
 		mui.addMessage(msg);
-		Iterator<ClientHandler> threadIter = threads.iterator();
-		while (threadIter.hasNext()) {
-			ClientHandler handler = threadIter.next();
+		for (ClientHandler handler: threads) {
 			handler.sendMessage(msg + "\n");
 		}
 	}
 
 	public void broadcastCommand(String msg, int ID) {
 		mui.addMessage(msg);
-		Iterator<ClientHandler> threadIter = threads.iterator();
-		while (threadIter.hasNext()) {
-			ClientHandler handler = threadIter.next();
+		for (ClientHandler handler: threads) {
 			if (handler.gameID == ID) {
 				handler.sendCommand(msg + "\n");
 			}
@@ -251,12 +247,6 @@ public class Server extends Thread {
 	public void addHandler(ClientHandler handler) {
 		threads.add(handler);
 		handler.start();
-		try {
-			handler.announce();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	private boolean checkValidUsername(String clientName) {
@@ -355,16 +345,13 @@ public class Server extends Thread {
 	}
 
 	public boolean validate(ClientHandler handler) {
-		System.out.println("CHECK DE USERNAME: " + handler.getClientName());
 		if (!checkValidUsername(handler.getClientName())) {
 			return false;
 		} else {// Het is een valide gebruikersnaam
-			System.out.println("DIT IS EEN VALID USERNAME");
 			// Nu allemaal authenticatie doen en dan zeggen dat er een nieuwe
 			// speler
 			// is.
-			boolean authenticatie = true;
-			if (authenticatie) {
+			if (handler.authenticatie) {
 				int toplayWith = handler.preferredPlayers;
 				switch (toplayWith) {
 				case 2:
@@ -386,9 +373,10 @@ public class Server extends Thread {
 				}
 				HandleRolitGame();// Mochten er nu genoeg spelers zijn, dan
 									// start hij een nieuw spel.
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 } // end of class Server
