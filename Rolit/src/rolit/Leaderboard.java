@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Map.Entry;
+
+import clientEnServer.RolitConstants;
 
 public class Leaderboard implements Serializable {
 
@@ -436,5 +439,25 @@ public class Leaderboard implements Serializable {
 		// Gooi dit nu in het leaderboard op een nieuw ID.
 		int ID = board.keySet().toArray().length;
 		board.put(ID, res);
+	}
+
+	public String getCommandScore() {
+		Iterator<LinkedList<Object>> iter = board.values().iterator();
+		String res = "";
+		while (iter.hasNext()){
+			LinkedList<Object> currentValue = iter.next();
+			Object naam = currentValue.get(NAME);
+			Object score = currentValue.get(SCORE);
+			 Calendar datumtijd = new GregorianCalendar();
+			 Object datum = currentValue.get(DATE);
+			 String[] dmy = datum.toString().split("-");
+			 Object time = currentValue.get(TIME);
+			 String[] hms = time.toString().split(":");
+			 datumtijd.set(Integer.parseInt(dmy[0]), Integer.parseInt(dmy[1]), Integer.parseInt(dmy[2]), Integer.parseInt(hms[0]),Integer.parseInt( hms[1]), Integer.parseInt(hms[2]));
+			 res += RolitConstants.msgDelim+naam+","+score+","+datumtijd.getTimeInMillis()+";";
+		}
+		return res;
+		// TODO Auto-generated method stub
+		
 	}
 }

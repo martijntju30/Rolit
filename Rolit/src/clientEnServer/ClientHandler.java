@@ -14,6 +14,8 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
+import rolit.Ball;
+import rolit.Board;
 import rolit.Game;
 import rolit.Validatie;
 
@@ -65,7 +67,21 @@ public class ClientHandler extends Thread {
 	public int announce() throws IOException {
 		boolean isValid = server.validate(this);
 		if (isValid) {
-			server.broadcastMessage("[" + clientName + " has entered]");
+			int resterendAantalSpelers = 0;
+			switch (this.preferredPlayers) {
+			case 2:
+				resterendAantalSpelers = 2 - server.playersFor2.size();
+				break;
+			case 3:
+				resterendAantalSpelers = 3 - server.playersFor3.size();
+				break;
+			case 4:
+				resterendAantalSpelers = 4 - server.playersFor4.size();
+				break;
+			}
+			sendCommand(RolitControl.welkom + RolitConstants.msgDelim
+					+ resterendAantalSpelers);
+			server.broadcastMessage(clientName + RolitConstants.msgDelim+"[" + clientName + " has entered]");
 		} else {
 			sendError(RolitConstants.errorGebruikersnaamInGebruik);
 			shutdown();
@@ -129,6 +145,15 @@ public class ClientHandler extends Thread {
 			}
 			shutdown();
 			break;
+		case RolitControl.getBoard:
+			Board bord = server.game.get(gameID).getBoardCopy();
+			String bordmessage = RolitControl.board;
+			for (int i = 0; i < (Board.DIM * Board.DIM); i++) {
+				bordmessage += RolitConstants.msgDelim
+						+ bord.getField(i).toString();
+			}
+			sendCommand(bordmessage);
+			break;
 		case (RolitControl.speelSpel):
 			clientName = commandline[1];
 			preferredPlayers = Integer.parseInt(commandline[2]);
@@ -155,27 +180,45 @@ public class ClientHandler extends Thread {
 			for (int i = 1; i < commandline.length; i++) {
 				zin = zin + " " + commandline[i];
 			}
-			server.broadcastMessage(clientName + " says: " + zin);
+			server.broadcastMessage(clientName
+					+ RolitConstants.msgDelim + zin);
 			break;
 		case RolitControl.doeZet:
 			int zet = Integer.parseInt(commandline[1]);
-			System.out.println("=====De zet is: " + zet);
 			if (Validatie.validMove(zet, game.getBoard(),
 					game.getCurrentPlayer())) {
-				server.broadcastCommand(line, gameID);
-				System.out.println("DOE BROADCAST VAN ZET");
+				server.broadcastCommand(RolitControl.zetGedaan
+						+ RolitConstants.msgDelim + zet
+						+ RolitConstants.msgDelim + clientName, gameID);
 				game.takeTurn(zet, true);
+				if (game.getBoard().hasWinner()) {
+					server.broadcastCommand(RolitControl.gameOver
+							+ RolitConstants.msgDelim + game.getWinner(),
+							gameID);
+				} else {
+					server.broadcastCommand(
+							RolitControl.aanDeBeurt + RolitConstants.msgDelim
+									+ game.getCurrentPlayer(), gameID);
+				}
 			} else {
 				sendError(RolitConstants.errorOngeldigeZet);
 			}
 			break;
 
-		case RolitConstants.errorAantalSpelersOngeldig:
-		case RolitConstants.errorGebruikersnaamInGebruik:
-		case RolitConstants.errorOngeldigCommando:
-		case RolitConstants.errorOngeldigeGebruikersnaam:
-		case RolitConstants.errorOngeldigeZet:
+		case RolitControl.verlaatSpel:
+			System.out.println("Een speler heeft verlaten. Geef dit door dat het spel is afgelopen.");
+			server.broadcastCommand(RolitControl.spelAfgelopen
+					+ RolitConstants.msgDelim
+					+ server.game.get(gameID).getWinner(true)
+					+ RolitConstants.msgDelim + clientName, gameID);
+			stopgame();
 			break;
+
+		case RolitControl.getScores:
+			server.broadcastCommand(RolitControl.scoreOverzicht
+					+ server.leaderboard.getCommandScore(), gameID);
+			break;
+
 		default:
 			sendError(RolitConstants.errorOngeldigCommando);
 			break;
@@ -183,8 +226,7 @@ public class ClientHandler extends Thread {
 	}
 
 	public void sendError(String errormsg) {
-		sendMessage(errormsg);
-		sendCommand(errormsg);
+		sendCommand(RolitControl.error + RolitConstants.msgDelim + errormsg);
 	}
 
 	/**
@@ -195,7 +237,7 @@ public class ClientHandler extends Thread {
 	public void sendMessage(String msg) {
 		try {
 			if (msg != null && !msg.equals("") && !msg.equals(" ")) {
-				out.write(RolitControl.nieuwChatbericht
+				out.write(RolitControl.chatberichtOntvangen
 						+ RolitConstants.msgDelim + msg + "\n");
 				out.flush();
 			}
@@ -231,12 +273,17 @@ public class ClientHandler extends Thread {
 	 * participating in the chat.
 	 */
 	private void shutdown() {
-		System.out.println("Remove thread");
 		server.removeHandler(this);
-		// if (this.authenticatie){
-		server.broadcastMessage("[" + clientName + " has left]");
-		// }
+		if (this.authenticatie){
+			server.broadcastCommand(RolitControl.verlaatSpel, gameID);
+			server.broadcastMessage(clientName + RolitConstants.msgDelim+"[" + clientName + " has left]");
+		}
 		doorgaan = false;
+	}
+	private void stopgame() {
+		server.game.get(gameID).endGame();
+		server.game.remove(gameID);
+		System.out.println("Game "+gameID+" gestopt");
 	}
 
 	protected void setGameID(int gameID2) {

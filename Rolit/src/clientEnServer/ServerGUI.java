@@ -148,13 +148,6 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 			}
 			
 		}
-		else if (src == addAI){
-			if (server != null) {
-				System.out.println("============================\n Dit werkt nog niet \n ========================");
-				addMessage("============================\n Dit werkt nog niet \n ========================");
-			}
-			
-		}
 	}
 
 	/**
@@ -204,6 +197,12 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	/** Start a ServerGUI application */
 	public static void main(String[] args) {
 		ServerGUI gui = new ServerGUI();
+	}
+
+	public void resetInvoer() {
+		tfPort.setEditable(true);
+		bConnect.setEnabled(true);
+		showLeaderboard.setEnabled(false);
 	}
 
 }

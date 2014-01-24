@@ -40,8 +40,8 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		DocumentListener {
 
 	private JButton bConnect;
-	private JTextField tfHost;
-	private JTextField tfPort;
+	public JTextField tfHost;
+	public JTextField tfPort;
 	public JTextField tfName;
 	public JPasswordField tfPass;
 	public JTextField tfSpelers;
@@ -58,6 +58,9 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
+				if (Client != null) {
+					Client.sendCommand(RolitControl.verlaatSpel);
+				}
 				e.getWindow().dispose();
 			}
 
@@ -65,6 +68,31 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 				System.exit(0);
 			}
 		});
+	}
+
+	/** Constructs a ClientGUI object. */
+	public ClientGUI(String host, String port, String name, String pass,
+			String spelers) {
+		super("ClientGUI");
+
+		buildGUI();
+		setVisible(true);
+
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				Client.sendCommand(RolitControl.verlaatSpel);
+				e.getWindow().dispose();
+			}
+
+			public void windowClosed(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+		tfHost.setText(host);
+		tfPort.setText(port);
+		tfName.setText(name);
+		tfPass.setText(pass);
+		tfSpelers.setText(spelers);
 	}
 
 	/** builds the GUI. */
@@ -128,7 +156,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 				Color.red));
 		p2.add(lbMessages);
 		JScrollPane scroll = new JScrollPane(taMessages);
-	    scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		p2.add(scroll, BorderLayout.SOUTH);
 
 		// Panel p3 - Messages
@@ -191,7 +219,6 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 		String name = "No Name";
 		String pass = "No Pass";
 		int spelers = 4;
-		int max = 0;
 
 		try {
 			port = Integer.parseInt(tfPort.getText());
@@ -226,6 +253,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 
 		addMessage("Started searching on port " + port + " of host " + host
 				+ "...");
+		addMessage("If you are not connected in 5 seconds, please try again.");
 	}
 
 	/** add a message to the textarea */
@@ -237,7 +265,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 	public static void main(String[] args) {
 		ClientGUI gui = new ClientGUI();
 	}
-	
+
 	public void resetInvoer() {
 		tfHost.setEditable(true);
 		tfHost.setEnabled(true);
@@ -273,8 +301,7 @@ public class ClientGUI extends JFrame implements ActionListener, MessageUI,
 	private void tfUpdates(DocumentEvent e) {
 		Object src = e.getDocument();
 		if (src == tfHost.getDocument() || src == tfPort.getDocument()
-				|| src == tfName.getDocument()
-						|| src == tfPass.getDocument()
+				|| src == tfName.getDocument() || src == tfPass.getDocument()
 				|| src == tfSpelers.getDocument()) {
 			if (!tfHost.getText().equals("") && !tfPort.getText().equals("")
 					&& !tfName.getText().equals("")

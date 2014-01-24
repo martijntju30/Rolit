@@ -267,8 +267,12 @@ public class Board {
 	 * @return true if the Ball has won
 	 */
 	/* @pure */
-	public boolean isWinner(Ball m) {
-		if (isFull()) {
+	public boolean isWinner(Ball m){
+		return isWinner(m, false);
+	}
+	
+	public boolean isWinner(Ball m, boolean vroegtijdigEinde) {
+		if (isFull() || vroegtijdigEinde) {
 			// Tel eerst hoeveel ballen iedere speler heeft.
 			int balls_yellow = countBalls(Ball.YELLOW);
 			int balls_blue = countBalls(Ball.BLUE);

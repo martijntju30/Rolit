@@ -27,10 +27,10 @@ public class Server extends Thread {
 	private MessageUI mui;
 	public Leaderboard leaderboard;
 	private Collection<ClientHandler> threads = new ArrayList<ClientHandler>();
-	private List<Game> game = new ArrayList<Game>();
-	private Set<ClientHandler> playersFor2 = new HashSet<ClientHandler>();
-	private Set<ClientHandler> playersFor3 = new HashSet<ClientHandler>();
-	private Set<ClientHandler> playersFor4 = new HashSet<ClientHandler>();
+	protected List<Game> game = new ArrayList<Game>();
+	protected Set<ClientHandler> playersFor2 = new HashSet<ClientHandler>();
+	protected Set<ClientHandler> playersFor3 = new HashSet<ClientHandler>();
+	protected Set<ClientHandler> playersFor4 = new HashSet<ClientHandler>();
 	private File leaderboardFile;
 
 	public static final boolean useFileLeaderboard = false;
@@ -211,6 +211,8 @@ public class Server extends Thread {
 				addHandler(new ClientHandler(this, newSock));
 			}
 		} catch (IOException e) {
+			mui.addMessage("Error, please try again on a different port!");
+			((ServerGUI) mui).resetInvoer();
 			e.printStackTrace();
 		}
 	}
@@ -324,8 +326,8 @@ public class Server extends Thread {
 			count++;
 		}
 		Game g = new Game(p[0], p[1], p[2], p[3], null, leaderboard);
-		game.add(g);
-		int gameID = game.size() - 1;
+		int gameID = game.size();//Dit is altijd vrij dus zet hem hier neer.
+		game.add(gameID, g);
 		for (ClientHandler client : handlers) {
 			client.game = g;
 			client.sendCommand(RolitControl.beginSpel + RolitConstants.msgDelim

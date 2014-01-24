@@ -7,6 +7,8 @@ import java.util.*;
 import javax.swing.*;
 
 import clientEnServer.Client;
+import clientEnServer.RolitConstants;
+import clientEnServer.RolitControl;
 import project.StretchIcon;
 import strategie.Strategys;
 
@@ -15,19 +17,22 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 
 	private Game g;
 	private Board bord;
-	protected JLabel label;
+	public JLabel label;
 	public JLabel kleur;
 	private Container container;
 	private JPanel c;
+	private Client client;
 
 	private boolean useImg = false;// Wil je images gebruiken? True=ja, False =
 									// nee;
 
 	// Maak alle buttons
-	private JButton[] button = new JButton[bord.DIM * bord.DIM];
+	public JButton[] button = new JButton[bord.DIM * bord.DIM];
 	private JButton hint = new JButton("Hint");
+	private JButton start_ai = new JButton("start ai");
 
 	public Rolit_view(Game g, Client client) {
+		this.client = client;
 		this.g = g;
 		this.bord = g.getBoard();
 		g.addObserver(this);
@@ -38,12 +43,19 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 			}
 
 			public void windowClosed(WindowEvent e) {
-				System.exit(0);
+				//System.exit(0);
 			}
 		});
 
 		label = new JLabel("Start game, RED is allowed to start the game.");
 		kleur = new JLabel("Your color is: --");
+
+		/*if(client.getName()!=null&&client.getName().startsWith("ai_")&&g.getCurrentPlayer().getName()!= null&&g.getCurrentPlayer().getName().startsWith("ai_")){
+
+			start_ai.addActionListener(this);
+			
+		}*/
+		start_ai.addActionListener(this);
 		hint.addActionListener(this);
 		container = getContentPane();
 		// c = getContentPane();
@@ -144,6 +156,8 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 		container.add(label);
 		container.add(kleur);
 		container.add(hint);
+		container.add(start_ai);
+		
 
 		repaint();
 		// c.setVisible(true);
@@ -207,6 +221,10 @@ public class Rolit_view extends JFrame implements Observer, ActionListener {
 			if (e.getSource() == hint) {
 				int index = Strategys.smartStrategyForHint(bord, g.getCurrentPlayer());
 				button[index].setBackground(Color.GRAY);
+			} else if(e.getSource() == start_ai){
+				if(g.getCurrentPlayer().toString().startsWith("ai_")){
+				client.sendCommand(RolitControl.doeZet+RolitConstants.msgDelim+strategie.Strategys.smartStrategyForHint(g.getBoard(), g.getCurrentPlayer()));
+				}
 			} else {
 				String[] chars = arg0.toString().split(" ");
 				int button_index = Integer.parseInt(chars[chars.length - 1]);

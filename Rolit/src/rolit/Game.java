@@ -1,14 +1,10 @@
 package rolit;
 
-import java.awt.List;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Scanner;
 import java.util.Set;
 
-import strategie.SmartStrategy;
+//import strategie.SmartStrategy;
 import clientEnServer.Client;
 import clientEnServer.RolitConstants;
 import clientEnServer.RolitControl;
@@ -89,40 +85,40 @@ public class Game extends Observable {
 		players = new Player[NUMBER_PLAYERS];
 		score = new int[NUMBER_PLAYERS];
 		if (s0 != null && !s0.getName().equals("null")) {
-			if (s0.getName().startsWith("ai_")){
-				players[0] = new SmartStrategy(s0.getName(), s0.getBall());
-				this.addObserver((SmartStrategy) players[0]);
-			}
-			else {
+//			if (s0.getName().startsWith("ai_")){
+//				players[0] = new SmartStrategy(s0.getName(), s0.getBall());
+//				this.addObserver((SmartStrategy) players[0]);
+//			}
+//			else {
 				players[0] = s0;
-			}
+//			}
 		}
 		if (s1 != null && !s1.getName().equals("null")) {
-			if (s1.getName().startsWith("ai_")){
-				players[1] = new SmartStrategy(s1.getName(), s1.getBall());
-				this.addObserver((SmartStrategy) players[1]);
-			}
-			else {
+//			if (s1.getName().startsWith("ai_")){
+//				players[1] = new SmartStrategy(s1.getName(), s1.getBall());
+//				this.addObserver((SmartStrategy) players[1]);
+//			}
+//			else {
 				players[1] = s1;
-			}
+//			}
 		}
 		if (s2 != null && !s2.getName().equals("null")) {
-			if (s2.getName().startsWith("ai_")){
-				players[2] = new SmartStrategy(s2.getName(), s2.getBall());
-				this.addObserver((SmartStrategy) players[2]);
-			}
-			else {
+//			if (s2.getName().startsWith("ai_")){
+//				players[2] = new SmartStrategy(s2.getName(), s2.getBall());
+//				this.addObserver((SmartStrategy) players[2]);
+//			}
+//			else {
 				players[2] = s2;
-			}
+//			}
 		}
 		if (s3 != null && !s3.getName().equals("null")) {
-			if (s3.getName().startsWith("ai_")){
-				players[3] = new SmartStrategy(s3.getName(), s3.getBall());
-				this.addObserver((SmartStrategy) players[3]);
-			}
-			else {
+//			if (s3.getName().startsWith("ai_")){
+//				players[3] = new SmartStrategy(s3.getName(), s3.getBall());
+//				this.addObserver((SmartStrategy) players[3]);
+//			}
+//			else {
 				players[3] = s3;
-			}
+//			}
 		}
 
 		current = 0;
@@ -204,8 +200,8 @@ public class Game extends Observable {
 
 	protected void nextPlayer() {
 		current = (current + 1) % NUMBER_PLAYERS;
-		this.setChanged();
-		this.notifyObservers(current+"");
+		//this.setChanged();
+		//this.notifyObservers(current+"");
 	}
 
 	// E{Spel.play}
@@ -286,7 +282,7 @@ public class Game extends Observable {
 						.equals(getCurrentPlayer().getName())) || fromServer) {
 			boolean valid = board.isField(choice) && board.isEmptyField(choice)
 					&& Validatie.validMove(choice, board, getCurrentPlayer());
-			if (!valid) {
+			if (!valid && !fromServer) {
 				view.label
 						.setText("This is not a valid move. Please try again \nIt's "
 								+ getCurrentPlayer().getName()
@@ -324,5 +320,28 @@ public class Game extends Observable {
 
 	public Board getBoardCopy() {
 		return board.deepCopy();
+	}
+
+
+	public String getWinner(){
+		return getWinner(false);
+	}
+	public String getWinner(boolean vroegtijdigEinde) {
+		for (Player p:players){
+				if (board.isWinner(p.getBall(), vroegtijdigEinde))
+					return p.getName();
+			}
+		return null;
+	}
+
+	public void endGame() {
+		view.dispose();
+		this.deleteObservers();
+		try {
+			this.finalize();
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

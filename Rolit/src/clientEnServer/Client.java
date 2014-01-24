@@ -16,6 +16,8 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
+import javax.swing.JButton;
+
 import project.*;
 import rolit.Ball;
 import rolit.Game;
@@ -46,27 +48,25 @@ public class Client extends Thread {
 	/**
 	 * Constructs a Client-object and tries to make a socket connection
 	 */
-	public Client(String name, String pass, int aantalSpelers, InetAddress host, int port,
-			MessageUI muiArg) throws IOException {
+	public Client(String name, String pass, int aantalSpelers,
+			InetAddress host, int port, MessageUI muiArg) throws IOException {
 		// Set the Message UI
 		this.mui = muiArg;
 		this.clientName = name;
 		// try to open a Socket to the server
 		try {
-			privkey = Authentication.getPrivateKey(name,
-					pass);
+			privkey = Authentication.getPrivateKey(name, pass);
 			if (privkey != null || name.startsWith("ai_")) {
-			sock = new Socket(host, port);
-			// create the bufferedreader and writer
-			in = new BufferedReader(
-					new InputStreamReader(sock.getInputStream()));
-			out = new BufferedWriter(new OutputStreamWriter(
-					sock.getOutputStream()));
-			out.write(RolitControl.speelSpel + RolitConstants.msgDelim + name
-					+ RolitConstants.msgDelim + aantalSpelers + "\n");
-			out.flush();
-			}
-			else {
+				sock = new Socket(host, port);
+				// create the bufferedreader and writer
+				in = new BufferedReader(new InputStreamReader(
+						sock.getInputStream()));
+				out = new BufferedWriter(new OutputStreamWriter(
+						sock.getOutputStream()));
+				out.write(RolitControl.speelSpel + RolitConstants.msgDelim
+						+ name + RolitConstants.msgDelim + aantalSpelers + "\n");
+				out.flush();
+			} else {
 				mui.addMessage("The username and password are incorrect");
 				((ClientGUI) mui).resetInvoer();
 			}
@@ -121,16 +121,19 @@ public class Client extends Thread {
 				out.flush();
 			}
 		} catch (IOException e) {
-			System.out.println("ERROR: er was een exceptie: " + e.getMessage()
+			System.err.println("ERROR: er was een exceptie: " + e.getMessage()
 					+ "\n met een pad: " + Arrays.toString(e.getStackTrace()));
 			shutdown();
 		}
 	}
 
 	/** close the socket connection. */
-	public void shutdown() {///Dit moet goed doen..
+	public void shutdown() {// /Dit moet goed doen..
 		try {
 			System.out.println("Shutdown client");
+			if (!sock.isClosed()) {
+			sendCommand(RolitControl.verlaatSpel);
+			}
 			doorgaan = false;
 			sock.close();
 		} catch (IOException e) {
@@ -154,13 +157,13 @@ public class Client extends Thread {
 		case (RolitControl.nonce):
 			try {
 				String sign = Authentication.signatur(commandline[1], privkey);
-				if (sign == null){
+				if (sign == null) {
 					mui.addMessage("The username and password are incorrect");
 					((ClientGUI) mui).resetInvoer();
 					shutdown();
 				}
-				sendCommand(RolitControl.sign + RolitConstants.msgDelim+ sign);
-				
+				sendCommand(RolitControl.sign + RolitConstants.msgDelim + sign);
+
 			} catch (InvalidKeyException | NoSuchAlgorithmException
 					| SignatureException e) {
 				// TODO Auto-generated catch block
@@ -185,41 +188,87 @@ public class Client extends Thread {
 			view = game.view;
 			view.kleur.setText("Your color: " + clientKleur.toString());
 			view.invalidate();
+			//Als de huidige speler (de beginspeler) een ai is, dan moet hij een zet doen.
+//			if (p[0].getName().startsWith("ai_")){
+//				aiMove();
+//			}
 			break;
-
-		case (RolitControl.nieuwChatbericht):
+			
+		case RolitControl.welkom:
+			mui.addMessage("You were succesfully connected to the server. To start your game, we just need "+commandline[1]+" more player(s).");
+			break;
+		case (RolitControl.chatberichtOntvangen):
 			// Een chatbericht kan spaties bevatten en dit is toevallig de
 			// delimiter
 			String zin = "";
-			for (int i = 1; i < commandline.length; i++) {
+			for (int i = 2; i < commandline.length; i++) {
 				zin = zin + " " + commandline[i];
 			}
-			mui.addMessage(zin);
+			if (zin.endsWith("has entered]") || zin.endsWith("as left]")){
+				mui.addMessage(zin);
+			}
+			else {
+			mui.addMessage(commandline[1]+" says:"+zin);
+			}
 			break;
 
-		case RolitControl.doeZet:
+		case RolitControl.zetGedaan:
 			System.out.println(clientName + ": Er wordt een zet gedaan..... "
 					+ commandline[1]);
 			game.takeTurn(Integer.parseInt(commandline[1]), true);
+			game.update();
+			game.view.invalidate();
+			break;
+			
+		case RolitControl.aanDeBeurt:
+			if (clientName.startsWith("ai_") && commandline[1].equals(clientName)){
+				aiMove();
+				}
 			break;
 
-		case RolitConstants.errorAantalSpelersOngeldig:
-		case RolitConstants.errorGebruikersnaamInGebruik:
-		case RolitConstants.errorOngeldigeGebruikersnaam:
+
+		case RolitControl.spelAfgelopen:
+		case RolitControl.gameOver:
 			((ClientGUI) mui).resetInvoer();
+			for (JButton button: view.button){
+				button.setEnabled(false);
+			}
+			game = null;
+			mui.addMessage("The game has been won by "+commandline[1]+" you can login again to start another game.");
 			break;
-		case RolitConstants.errorOngeldigCommando:
-		case RolitConstants.errorOngeldigeZet:
+			
+		case RolitControl.scoreOverzicht:
+			//Wij doen niets met dit commando.
 			break;
 
-		default:
-			sendError(RolitConstants.errorOngeldigCommando);
+		case RolitControl.error:
+			String errortype = commandline[1];
+			switch (errortype) {
+			case RolitConstants.errorAantalSpelersOngeldig:
+			case RolitConstants.errorGebruikersnaamInGebruik:
+			case RolitConstants.errorOngeldigeGebruikersnaam:
+				((ClientGUI) mui).resetInvoer();
+				break;
+
+			case RolitConstants.errorOngeldigCommando:
+				break;
+			case RolitConstants.errorOngeldigeZet:
+				game.view.label.setText("The server determines this is not a valid move. Please try again! It's "+game.getCurrentPlayer()+ " ("+game.getCurrentPlayer().getBall()+") turn."); 
+				break;
+			}
+			break;
+		case RolitControl.board:
+			//Wij doen niets met dit commando
 			break;
 		}
 	}
 
+	private void aiMove() {
+		System.out.println("De AI doet een zet!");
+		sendCommand(RolitControl.doeZet+RolitConstants.msgDelim+strategie.Strategys.smartStrategyForHint(game.getBoard(), game.getCurrentPlayer()));
+	}
+
 	public void sendError(String errormsg) {
-		sendMessage(errormsg);
 		sendCommand(errormsg);
 	}
 
