@@ -1,64 +1,54 @@
 package clientEnServer;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.net.*;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
-
-import rolit.Game;
+import javax.swing.*;
 
 /**
- * ServerGui. A GUI for the Server.
+ * ServerGui.
  * 
+ * @author Martijn & Camilio
  * @author Theo Ruys
- * @version 2005.02.21
  */
+@SuppressWarnings("serial")
 public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 
 	private JButton bConnect;
 	private JTextField tfPort;
 	private JTextArea taMessages;
 	private Server server;
-	private Game game;
 	private JButton showLeaderboard;
 	private JButton addAI;
 
-	/** Constructs a ServerGUI object. */
+	/**
+	 * Maakt een serverGUI object
+	 */
 	public ServerGUI() {
+		// Geef de titel van de window.
 		super("ServerGUI");
-
+		// Maak de GUI
 		buildGUI();
+		// Maak de elementen zichtbaar
 		setVisible(true);
-
+		// Geef de actie aan die moet gebeuren als er op kruisje is geklikt.
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
+				// /Sluit de window
 				e.getWindow().dispose();
 			}
 
 			public void windowClosed(WindowEvent e) {
+				// Als er een leaderboard moet worden opgeslagen, doe dit als
+				// hij niet null is.
 				boolean leaderboardSaved = !Server.useFileLeaderboard;
 				if (server != null && server.leaderboard != null)
-				while (!leaderboardSaved) {
-					leaderboardSaved = server.saveLeaderboard();
-				}
+					while (!leaderboardSaved) {
+						leaderboardSaved = server.saveLeaderboard();
+					}
+				// Stop de sessie.
 				System.exit(0);
 			}
 		});
@@ -69,39 +59,39 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		setSize(600, 400);
 
 		// Panel p1 - Listen
-
+		// Maak het bovenste paneel. Bestaande uit een gridLayout voor de
+		// invoervakken en een button
 		JPanel p1 = new JPanel(new FlowLayout());
 		JPanel pp = new JPanel(new GridLayout(2, 2));
 
+		// Maak het adreslabel en het tekstvak.
 		JLabel lbAddress = new JLabel("Address: ");
 		JTextField tfAddress = new JTextField(getHostAddress(), 12);
 		tfAddress.setEditable(false);
 
+		// Doe hetzelfde voor de poort.
 		JLabel lbPort = new JLabel("Port:");
 		tfPort = new JTextField("2727", 5);
 
+		// Voeg ze toe aan de gridlayout.
 		pp.add(lbAddress);
 		pp.add(tfAddress);
 		pp.add(lbPort);
 		pp.add(tfPort);
 
+		// Maak een connectbutton en een showLeaderboard
 		bConnect = new JButton("Start Listening");
 		bConnect.addActionListener(this);
 		showLeaderboard = new JButton("Show leaderboard");
 		showLeaderboard.addActionListener(this);
 		showLeaderboard.setEnabled(false);
-		addAI = new JButton("Add AI");
-		addAI.addActionListener(this);
-		addAI.setEnabled(false);
 
 		p1.add(pp, BorderLayout.WEST);
 		p1.add(bConnect, BorderLayout.EAST);
 		p1.add(showLeaderboard, BorderLayout.EAST);
-		//p1.add(addAI, BorderLayout.SOUTH);
-		//p1.add(buttons, BorderLayout.EAST);
-		
-		// Panel p2 - Messages
 
+		// Panel p2 - Messages
+		// Het tekstvak met daarin alle berichten.
 		JPanel p2 = new JPanel();
 		p2.setLayout(new BorderLayout());
 
@@ -109,17 +99,21 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		taMessages = new JTextArea("", 15, 50);
 		taMessages.setEditable(false);
 		p2.add(lbMessages);
+		// Geef het vak een scrollbar.
 		JScrollPane scroll = new JScrollPane(taMessages);
 		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		p2.add(scroll, BorderLayout.SOUTH);
 
+		// Voeg alles toe aan de container.
 		Container cc = getContentPane();
 		cc.setLayout(new FlowLayout());
 		cc.add(p1);
 		cc.add(p2);
 	}
 
-	/** returns the Internetadress of this computer */
+	/**
+	 * Geeft het Internetadress van deze computer
+	 */
 	private String getHostAddress() {
 		try {
 			InetAddress iaddr = InetAddress.getLocalHost();
@@ -130,75 +124,93 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	}
 
 	/**
-	 * listener for the "Start Listening" button
+	 * listener voor de buttons
 	 */
 	public void actionPerformed(ActionEvent ev) {
 		Object src = ev.getSource();
+		// Er is op connect gedrukt
 		if (src == bConnect) {
+			// Start de server
 			startListening();
 		}
-		else if (src == showLeaderboard){
+		// Er is op show Leaderboard gedrukt
+		else if (src == showLeaderboard) {
+			// Geef het leaderboard weer als het leaderboard niet null is.
 			if (server != null && server.leaderboard != null) {
-				Object[] bord = server.leaderboard.getShowBoard(server.leaderboard.getHighscore(3));
+				Object[] bord = server.leaderboard
+						.getShowBoard(server.leaderboard.getHighscore(3));
 				String res = "";
-				for (Object regel:bord){
-					res = res +""+regel;
+				for (Object regel : bord) {
+					res = res + "" + regel;
 				}
 				addMessage(res);
 			}
-			
+
 		}
 	}
 
 	/**
-	 * Construct a Server-object, which is waiting for clients. The port field
-	 * and button should be disabled
+	 * Maakt een serverobject die de clients accepteert. De poort kan hierna
+	 * niet meer gewijzigd worden. Ook de button connect mag niet meer op worden
+	 * gedrukt. Maar het leaderboard juist wel.
 	 */
 	private void startListening() {
 		int port = 0;
-		int max = 0;
-
 		try {
+			// Haal de poort op
 			port = Integer.parseInt(tfPort.getText());
 		} catch (NumberFormatException e) {
 			addMessage("ERROR: not a valid portnumber!");
 			return;
 		}
 
+		// Zorg ervoor dat er niet meer gewijzigd kan worden.
 		tfPort.setEditable(false);
 		bConnect.setEnabled(false);
 		showLeaderboard.setEnabled(true);
 
 		try {
+			// Maak de server
 			server = new Server(port, this);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		// Start de server
 		server.start();
 
+		// Zeg dat de server is gestart
 		addMessage("Started listening on port " + port + "...");
 		// De server en chatbox zijn nu gestart, start nu ook begin voor de
 		// game.
 		server.HandleRolitGame();
 	}
 
-	/** add a message to the textarea */
+	/**
+	 * Voeg een bericht toe aan het tekstveld.
+	 */
 	public void addMessage(String msg) {
 		taMessages.append(msg + "\n");
 	}
 
-	/** Start a ServerGUI application */
+	/**
+	 * Maak een serverGUI
+	 * 
+	 * @param args
+	 *            eventuele argumenten waar niets mee wordt gedaan.
+	 */
 	public static void main(String[] args) {
-		ServerGUI gui = new ServerGUI();
+		new ServerGUI();
 	}
 
+	/**
+	 * Zet de invoer weer terug op zijn originele staat. Dit is handig voor als
+	 * er iets niet goed gaat.
+	 */
 	public void resetInvoer() {
 		tfPort.setEditable(true);
 		bConnect.setEnabled(true);

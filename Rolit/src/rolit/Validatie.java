@@ -5,6 +5,20 @@ import java.util.Set;
 
 public class Validatie {
 
+	/**
+	 * Kijkt of een zet valide is. Een zet is valide als hij: - grenst aan een
+	 * andere bal - op een vrij veld wordt gezet - ballen overneemt als dat kan
+	 * 
+	 * @param zet
+	 *            De zet die gecontroleerd moet worden
+	 * @param board
+	 *            Het bord waarop de zet gecontroleerd moet worden
+	 * @param player
+	 *            De speler die de zet zou willen doen.
+	 * @return true als de zet valide is.
+	 */
+	// @requires board != null && player!=null && board.isField(zet) &&
+	// board.isEmptyField(zet);
 	public static boolean validMove(int zet, Board board, Player player) {
 		boolean valid = false;
 		// Een move is pas valid als hij grenst aan een andere bal
@@ -44,6 +58,14 @@ public class Validatie {
 
 	}
 
+	/**
+	 * Haalt alle vrije indexen op van het bord b.
+	 * 
+	 * @param b
+	 *            het bord waarvan de vrije indexen moeten worden bepaald.
+	 * @return een set met vrije indexen/
+	 */
+	// @requires b!=null;
 	public static Set<Integer> getFreeIndexes(Board b) {
 		Set<Integer> resultList = new HashSet<Integer>();
 		for (int i = 0; i < (Board.DIM * Board.DIM); i++) {
@@ -54,7 +76,20 @@ public class Validatie {
 		return resultList;
 	}
 
-	public static Set<Integer> getPossibleTakeOvers(int zet, Board board, Player player) {
+	/**
+	 * Kijkt of de speler met de zet andere ballen overneemt, en welke dit dan
+	 * zijn.
+	 * 
+	 * @param zet
+	 *            de zet
+	 * @param board
+	 *            het bord waarop gekeken wordt
+	 * @param player
+	 *            de speler die de zet (moet) doen.
+	 * @return een set met alle mogelijke overnames.
+	 */
+	public static Set<Integer> getPossibleTakeOvers(int zet, Board board,
+			Player player) {
 		HashSet<Integer> result = new HashSet<Integer>();
 		for (int i = -1; i < 2; i++) {
 			for (int j = -1; j < 2; j++) {
@@ -67,7 +102,24 @@ public class Validatie {
 		return result;
 	}
 
-	public static Set<Integer> getTakeOvers(int zet, Board board, Player player, int plusRow, int plusCol) {
+	/**
+	 * Haalt alle overnames op die gedaan worden als je de zet doet op het bord
+	 * en dan kijkt naar een bepaalde richting.
+	 * 
+	 * @param zet
+	 *            de zet
+	 * @param board
+	 *            het bord
+	 * @param player
+	 *            de speler
+	 * @param plusRow
+	 *            de richtig naar boven of beneden
+	 * @param plusCol
+	 *            de richting naar links of naar rechts.
+	 * @return de mogelijke overnames van de zet in de bepaalde richting.
+	 */
+	public static Set<Integer> getTakeOvers(int zet, Board board,
+			Player player, int plusRow, int plusCol) {
 		Set<Integer> toChange = new HashSet<Integer>();
 		Ball playermark = player.getBall();
 		int r = board.getRow(zet) + plusRow;

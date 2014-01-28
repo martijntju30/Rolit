@@ -1,11 +1,14 @@
 package clientEnServer;
 
 /**
- * P2 prac wk4.
- * MessageUI. 
+ * Een interface voor de GUI's van client en server
  * @author  Theo Ruys
- * @version 2005.02.21
  */
 interface MessageUI {
+	/**
+	 * Laat het bericht toevoegen aan de berichten in het tekstvak berichten.
+	 * @param msg Het bericht dat moet worden toegevoegd.
+	 */
+	//@requires msg !=null;
 	public void addMessage(String msg);
 }

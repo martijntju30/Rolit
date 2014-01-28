@@ -1,276 +1,220 @@
 package rolit;
 
 /**
- * Game board for the Tic Tac Toe game. Module 2 lab assignment.
+ * Bord voor Rolit
  * 
+ * @author Martijn & Camilio
  * @author Theo Ruys en Arend Rensink
- * @version $Revision: 1.4 $
  */
 public class Board {
 
-	// -- Constants --------------------------------------------------
-
 	public static final int DIM = 8;
-	private static final String[] NUMBERING = { 
-			" 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 ", "----+----+----+----+----+----+----+----", 
-			" 08 | 09 | 10 | 11 | 12 | 13 | 14 | 15 ", "----+----+----+----+----+----+----+----", 
-			" 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 ", "----+----+----+----+----+----+----+----",
-			" 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 ", "----+----+----+----+----+----+----+----",
-			" 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 ", "----+----+----+----+----+----+----+----",
-			" 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 ", "----+----+----+----+----+----+----+----",
-			" 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 ", "----+----+----+----+----+----+----+----",
-			" 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63 ", "----+----+----+----+----+----+----+----" };
+	private static final String[] NUMBERING = {
+			" 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 ",
+			"----+----+----+----+----+----+----+----",
+			" 08 | 09 | 10 | 11 | 12 | 13 | 14 | 15 ",
+			"----+----+----+----+----+----+----+----",
+			" 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 ",
+			"----+----+----+----+----+----+----+----",
+			" 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 ",
+			"----+----+----+----+----+----+----+----",
+			" 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 ",
+			"----+----+----+----+----+----+----+----",
+			" 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 ",
+			"----+----+----+----+----+----+----+----",
+			" 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 ",
+			"----+----+----+----+----+----+----+----",
+			" 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63 ",
+			"----+----+----+----+----+----+----+----" };
 	private static final String LINE = "--------+--------+--------+--------+--------+--------+--------+--------";
 	private static final String DELIM = "      ";
-
-	// -- Instance variables -----------------------------------------
-
-	/*
-	 * @ private invariant fields.length == DIM*DIM; invariant (\forall int i; 0
-	 * <= i & i < DIM*DIM; getField(i) == Ball.EMPTY || getField(i) == Ball.XX
-	 * || getField(i) == Ball.OO);
-	 */
-	/**
-	 * The DIM by DIM fields of the Tic Tac Toe board. See NUMBERING for the
-	 * coding of the fields.
-	 */
 	private Ball[] fields;
 
-	// -- Constructors -----------------------------------------------
-
-	/*
-	 * @ ensures (\forall int i; 0 <= i & i < DIM * DIM; this.getField(i) ==
-	 * Ball.EMPTY);
-	 */
 	/**
-	 * Creates an empty board.
+	 * Maakt een nieuw bord. Vult de fieldsarray en zet de standaard waarden.
 	 */
-	// B{Bord-impl}
+	// @ ensures (\forall int i; 0 <= i & i < DIM * DIM; this.getField(i)
+	// ==Ball.EMPTY);
 	public Board() {
-		// E{Bord}
 		fields = new Ball[DIM * DIM];
 		reset();
-		// B{Bord}
-		// I{Bord} // [BODY-NOG-TOE-TE-VOEGEN]
 	}
 
-	// E{Bord-impl}
-	// -- Queries ----------------------------------------------------
-
-	/*
-	 * @ ensures \result != this; ensures (\forall int i; 0 <= i & i < DIM *
-	 * DIM; \result.getField(i) == this.getField(i));
-	 */
 	/**
-	 * Creates a deep copy of this field.
+	 * Maakt een kopie van het bord zodat je kan klooien wat je wil, maar het
+	 * echte bord niet wordt aangepast.
 	 */
-	// B{Bord-impl}
+	// @ensures \result != this; ensures (\forall int i; 0 <= i & i < DIM * DIM;
+	// \result.getField(i) == this.getField(i));
 	public Board deepCopy() {
-		// E{Bord}
 		Board copy = new Board();
 		for (int i = 0; i < fields.length; i++) {
 			copy.fields[i] = this.fields[i];
 		}
 		return copy;
-		// B{Bord}
-		// I{Bord} // [BODY-NOG-TOE-TE-VOEGEN]
-		// I{Bord} return null;
 	}
 
-	// E{Bord-impl}
-
-	/*
-	 * @ requires 0 <= row & row < DIM; requires 0 <= col & col < DIM;
-	 */
 	/**
-	 * Calculates the index in the linear array of fields from a (row, col)
-	 * pair.
+	 * Zoekt de index van een rij en kolom.
 	 * 
-	 * @return the index belonging to the (row,col)-field
+	 * @return de index
 	 */
-	// B{Bord-impl}
+	// @ requires 0 <= row & row < DIM; requires 0 <= col & col < DIM;
 	public int index(int row, int col) {
-		// E{Bord}
-		//Rijen die buiten het bord vallen moeten worden genegeerd, wat betekent -1 teruggeven
-		if (row >=DIM || col >= DIM){
+		// Rijen die buiten het bord vallen moeten worden genegeerd, wat
+		// betekent -1 teruggeven
+		if (row >= DIM || col >= DIM) {
 			return -1;
 		}
 		return DIM * row + col;
-		// B{Bord}
-		// I{Bord} // [BODY-NOG-TOE-TE-VOEGEN]
-		// I{Bord} return 0;
-	}
-	
-	public int getRow(int index){
-		return index/DIM;
-		
-	}
-	
-	public int getCol(int index){
-		return (index%DIM);
-		
 	}
 
-	// E{Bord-impl}
-
-	/*
-	 * @ ensures \result == (0 <= ix && ix < DIM * DIM);
-	 */
 	/**
-	 * Returns true if <code>ix</code> is a valid index of a field on tbe board.
+	 * Geeft de rij terug van de index waar het bij hoort.
 	 * 
-	 * @return <code>true</code> if <code>0 <= ix < DIM*DIM</code>
+	 * @param index
+	 *            de index waarvan je de rij wilt weten
+	 * @return de rij.
 	 */
-	// B{Bord-impl}
-	/* @pure */
+	// @requires isField(index);
+	// @ensures \result <=DIM;
+	public int getRow(int index) {
+		return index / DIM;
+	}
+
+	/**
+	 * Geeft de kolom terug van de index waar het bij hoort.
+	 * 
+	 * @param index
+	 *            de index waarvan je de kolom wilt weten
+	 * @return de kolom.
+	 */
+	// @requires isField(index);
+	// @ensures \result <=DIM;
+	public int getCol(int index) {
+		return (index % DIM);
+	}
+
+	/**
+	 * Geeft true als ix een index is op het veld.
+	 * 
+	 * @return true bij een echte index, false bij een index buiten het veld.
+	 */
+	// @ ensures \result == (0 <= ix && ix < DIM * DIM);
+	// @pure;
 	public boolean isField(int ix) {
-		// E{Bord}
 		return (0 <= ix) && (ix < DIM * DIM);
-		// B{Bord}
-		// I{Bord} // [BODY-NOG-TOE-TE-VOEGEN]
-		// I{Bord} return false;
 	}
 
-	// E{Bord-impl}
-	/*
-	 * @ ensures \result == (0 <= row && row < DIM && 0 <= col && col < DIM);
-	 */
 	/**
-	 * Returns true of the (row,col) pair refers to a valid field on the board.
+	 * Geeft true als row,col een index is op het veld.
 	 * 
-	 * @return true if <code>0 <= row < DIM && 0 <= col < DIM</code>
+	 * @return true bij een echte index, false bij een index buiten het veld.
 	 */
-	// B{Bord-impl}
-	/* @pure */
+	// @ensures \result == (0 <= row && row < DIM && 0 <= col && col < DIM);
+	// @pure;
 	public boolean isField(int row, int col) {
-		// E{Bord}
 		return (0 <= row) && (row < DIM) && (0 <= col) && (col < DIM);
-		// B{Bord}
-		// I{Bord} // [BODY-NOG-TOE-TE-VOEGEN]
-		// I{Bord} return false;
 	}
 
-	// E{Bord-impl}
-
-	/*
-	 * @ requires this.isField(i); ensures \result == Ball.EMPTY || \result ==
-	 * Ball.XX || \result == Ball.OO;
-	 */
 	/**
-	 * Returns the content of the field <code>i</code>.
+	 * Geeft de inhoud van veld i.
 	 * 
 	 * @param i
-	 *            the number of the field (see NUMBERING)
-	 * @return the Ball on the field
+	 *            De index van het veld.
+	 * @return De Ball op het veld.
 	 */
-	// B{Bord-impl}
+	// @ requires this.isField(i);
 	public Ball getField(int i) {
-		// E{Bord}
 		return fields[i];
-		// B{Bord}
-		// I{Bord} // [BODY-NOG-TOE-TE-VOEGEN]
-		// I{Bord} return null;
 	}
 
-	// E{Bord-impl}
-	/*
-	 * @ requires this.isField(row,col); ensures \result == Ball.EMPTY ||
-	 * \result == Ball.XX || \result == Ball.OO;
-	 */
 	/**
-	 * Returns the content of the field referred to by the (row,col) pair.
+	 * geeft de inhoud van het veld op row, col.
 	 * 
 	 * @param row
-	 *            the row of the field
+	 *            De rij
 	 * @param col
-	 *            the column of the field
-	 * @return the Ball on the field
+	 *            De kolom
+	 * @return De ball op het veld.
 	 */
+	// @ requires this.isField(row,col);
 	public Ball getField(int row, int col) {
 		return fields[index(row, col)];
 	}
 
-	/*
-	 * @ requires this.isField(i); ensures \result == (this.getField(i) ==
-	 * Ball.EMPTY);
-	 */
 	/**
-	 * Returns true if the field <code>i</code> is empty.
+	 * Geeft true terug als het veld i leeg is.
 	 * 
 	 * @param i
-	 *            the index of the field (see NUMBERING)
-	 * @return true if the field is empty
+	 *            De index
+	 * @return true als het een leeg veld is.
 	 */
+	// @requires this.isField(i);
+	// @ensures \result == (this.getField(i) == Ball.EMPTY);
 	public boolean isEmptyField(int i) {
 		return getField(i) == Ball.EMPTY;
 	}
 
-	/*
-	 * @ requires this.isField(row,col); ensures \result ==
-	 * (this.getField(row,col) == Ball.EMPTY);
-	 */
 	/**
-	 * Returns true if the field referred to by the (row,col) pair it empty.
+	 * Geeft true terug als het veld row, col leeg is.
 	 * 
 	 * @param row
-	 *            the row of the field
+	 *            De rij
 	 * @param col
-	 *            the column of the field
-	 * @return true if the field is empty
+	 *            De kolom
+	 * @return true als het een leeg veld is.
 	 */
+	// @requires this.isField(row,col);
+	// @ensures \result == (this.getField(row,col) == Ball.EMPTY);
 	/* @pure */
 	public boolean isEmptyField(int row, int col) {
 		return isEmptyField(index(row, col));
 	}
 
-	/*
-	 * @ ensures \result == (\forall int i; i <= 0 & i < DIM * DIM;
-	 * this.getField(i) != Ball.EMPTY);
-	 */
 	/**
-	 * Tests if the whole board is full.
+	 * Controleert of het hele bord vol is.
 	 * 
-	 * @return true if all fields are occupied
+	 * @return true als alle velden niet leeg zijn.
 	 */
-	/* @pure */
+	// @ ensures \result == (\forall int i; i <= 0 & i < DIM * DIM;
+	// this.getField(i) != Ball.EMPTY);
+	// @pure;
 	public boolean isFull() {
-		// E{Bord}
-		boolean result = true;
 		for (int i = 0; i < fields.length; i++) {
+			// Kijkt of elk veld leeg is, als er een veld leeg is, dan is het
+			// bord dus niet vol.
 			if (isEmptyField(i)) {
-				result = false;
+				return false;
 			}
 		}
-		return result;
+		// Er is geen leeg veld gevonden. Dus alle velden zijn vol.
+		return true;
 	}
 
-	/*
-	 * @ ensures \result == this.isFull() || this.hasWinner();
-	 */
 	/**
-	 * Returns true if the game is over. The game is over when there is a winner
-	 * or the whole board is full.
+	 * Geeft true terug als het bord vol is.
 	 * 
-	 * @return true if the game is over
+	 * @return true als het spel afgelopen is.
 	 */
-	/* @pure */
+	// @ ensures \result == this.isFull();
+	// @pure;
 	public boolean gameOver() {
 		return isFull();
 	}
 
 	/**
-	 * Checks if the Ball <code>m</code> has won. A Ball wins if it controls at
-	 * least one row, column or diagonal.
+	 * Kijkt of de speler met ball m heeft gewonnen.
 	 * 
 	 * @param m
-	 *            the Ball of interest
-	 * @return true if the Ball has won
+	 *            De ball
+	 * @return true als de speler met die ball heeft gewonnen.
 	 */
-	/* @pure */
-	public boolean isWinner(Ball m){
+	// @pure;
+	public boolean isWinner(Ball m) {
 		return isWinner(m, false);
 	}
-	
+
 	public boolean isWinner(Ball m, boolean vroegtijdigEinde) {
 		if (isFull() || vroegtijdigEinde) {
 			// Tel eerst hoeveel ballen iedere speler heeft.
@@ -284,21 +228,42 @@ public class Board {
 			// Kijk nu wie de meeste ballen heeft
 			int balls_max = Math.max(Math.max(balls_green, balls_red),
 					Math.max(balls_blue, balls_yellow));
-			return (balls_m == balls_max || !isDraw(balls_yellow, balls_blue, balls_green, balls_red, balls_max));
+			return (balls_m == balls_max || !isDraw(balls_yellow, balls_blue,
+					balls_green, balls_red, balls_max));
 		}
 		return false;
 	}
 
+	/**
+	 * Kijkt of er gelijk spel is.
+	 * 
+	 * @param balls_yellow
+	 *            aantal gele ballen op het veld
+	 * @param balls_blue
+	 *            aantal blauwe ballen op het veld
+	 * @param balls_green
+	 *            aantal groen ballen op het veld
+	 * @param balls_red
+	 *            aantal rode ballen op het veld
+	 * @param balls_max
+	 *            het maximum van de bovenstaande aantallen.
+	 * @return true als de twee hoogste aantallen gelijk zijn.
+	 */
 	private boolean isDraw(int balls_yellow, int balls_blue, int balls_green,
 			int balls_red, int balls_max) {
+		// Zet de aantallen in een array.
 		int[] arr = new int[4];
 		arr[0] = balls_yellow;
 		arr[1] = balls_blue;
 		arr[2] = balls_green;
 		arr[3] = balls_red;
-		for (int i = 0; i<arr.length; i++){
-			for (int j = 0; j<arr.length; j++){
-				if (arr[i] == arr[j] && arr[i] == balls_max){
+		// Kijk of twee van deze vier gelijk is aan elkaar
+		for (int i = 0; i < arr.length; i++) {
+			for (int j = 0; j < arr.length; j++) {
+				// Als twee gelijk zijn en gelijk zijn aan het maximum en niet
+				// dezelfde zijn (dus niet allebei geel) dan is er dus een
+				// gelijk spel.
+				if (arr[i] == arr[j] && arr[i] == balls_max && i != j) {
 					return true;
 				}
 			}
@@ -306,6 +271,16 @@ public class Board {
 		return false;
 	}
 
+	/**
+	 * Telt het aantal ballen op het veld van een bepaalde ball kleur.
+	 * 
+	 * @param m
+	 *            de ball die we tellen.
+	 * @return het aantal ballen op het veld.
+	 */
+	// @requires m.equals(Ball.RED) || m.equals(Ball.GREEN) ||
+	// m.equals(Ball.YELLOW) || m.equals(Ball.BLUE);
+	// @ensures \result >=0 && \result <=64;
 	public int countBalls(Ball m) {
 		// Ga alle velden langs en kijk of het een bal van m is
 		int counter = 0;
@@ -316,28 +291,23 @@ public class Board {
 		}
 		return counter;
 	}
-	
-	/*
-	 * @ ensures \result == isWinner(Ball.XX) | \result == isWinner(Ball.OO);
-	 */
+
 	/**
-	 * Returns true if the game has a winner. This is the case when one of the
-	 * Balls controls at least one row, column or diagonal.
+	 * Kijkt of er een winnaar is.
 	 * 
-	 * @return true if the board has a winner.
+	 * @return als een van de vier ballen de winnaar is, dan is er dus een
+	 *         winnaar.
 	 */
-	/* @pure */
+	// @pure;
 	public boolean hasWinner() {
-		// E{Bord}
 		return isWinner(Ball.BLUE) || isWinner(Ball.GREEN)
 				|| isWinner(Ball.RED) || isWinner(Ball.YELLOW);
 	}
 
 	/**
-	 * Returns a String representation of this board. In addition to the current
-	 * situation, the String also shows the numbering of the fields.
+	 * Geeft de stringrepresentatie van het bord.
 	 * 
-	 * @return the game situation as String
+	 * @return het bord als string.
 	 */
 	public String toString() {
 		String s = "";
@@ -356,59 +326,57 @@ public class Board {
 		}
 		return s;
 	}
-	public static String format(String str){
+
+	/**
+	 * Geeft een mooi uitgelijnde string terug
+	 * 
+	 * @param str
+	 *            de string om uit te lijnen
+	 * @return de uitgelijnde string.
+	 */
+	public static String format(String str) {
 		return String.format("%1$6s", str);
 	}
 
-	// -- Commands ---------------------------------------------------
-
-	/*
-	 * @ ensures (\forall int i; 0 <= i & i < DIM * DIM; this.getField(i) ==
-	 * Ball.EMPTY);
-	 */
 	/**
-	 * Empties all fields of this board (i.e., let them refer to the value
-	 * Ball.EMPTY).
+	 * Zet het bord naar de startsituatie.
 	 */
 	public void reset() {
+		// Maakt alle velden leeg.
 		for (int i = 0; i < fields.length; i++) {
 			setField(i, Ball.EMPTY);
 		}
-		setField(27, Ball.BLUE);
+		// Legt de eerste 4 ballen vast neer.
+		setField(27, Ball.RED);
 		setField(28, Ball.YELLOW);
-		setField(35, Ball.GREEN);
-		setField(36, Ball.RED);
+		setField(35, Ball.BLUE);
+		setField(36, Ball.GREEN);
 	}
 
-	/*
-	 * @ requires this.isField(i); ensures this.getField(i) == m;
-	 */
 	/**
-	 * Sets the content of field <code>i</code> to the Ball <code>m</code>.
+	 * Zet de ball m op het veld i
 	 * 
 	 * @param i
-	 *            the field number (see NUMBERING)
+	 *            de index
 	 * @param m
-	 *            the Ball to be placed
+	 *            de Ball die moet worden neergelegd.
 	 */
+	// @ requires this.isField(i); ensures this.getField(i) == m;
 	public void setField(int i, Ball m) {
 		fields[i] = m;
 	}
 
-	/*
-	 * @ requires this.isField(row,col); ensures this.getField(row,col) == m;
-	 */
 	/**
-	 * Sets the content of the field represented by the (row,col) pair to the
-	 * Ball <code>m</code>.
+	 * Zet de ball m op het veld row, col
 	 * 
 	 * @param row
-	 *            the field's row
+	 *            de rij
 	 * @param col
-	 *            the field's column
+	 *            de kolom.
 	 * @param m
-	 *            the Ball to be placed
+	 *            de Ball die moet worden neergelegd.
 	 */
+	// @ requires this.isField(index(row,col)); ensures this.getField(index(row,col)) == m;
 	public void setField(int row, int col, Ball m) {
 		setField(index(row, col), m);
 	}

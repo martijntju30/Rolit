@@ -1,19 +1,16 @@
 package rolit;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
-import java.util.Map.Entry;
-
 import clientEnServer.RolitConstants;
 
+@SuppressWarnings("serial")
 public class Leaderboard implements Serializable {
 
 	/**
-	 * 
+	 * @author Martijn & Camilio
 	 */
-	private static final long serialVersionUID = 1L;
 
 	private static Map<Integer, LinkedList<Object>> board = new HashMap<Integer, LinkedList<Object>>();
 
@@ -21,10 +18,6 @@ public class Leaderboard implements Serializable {
 	private static final int SCORE = 1;
 	private static final int DATE = 2;
 	private static final int TIME = 3;
-
-	public Leaderboard() {
-		// Auto-generated constructor stub
-	}
 
 	/**
 	 * Voeg een score toe aan het leaderboard
@@ -288,11 +281,7 @@ public class Leaderboard implements Serializable {
 			Object[] res2 = res.toArray();
 			if (getDate((String) res2[DATE]).equals(getDate(day))) {
 				linkedScores.add(res2[SCORE]);
-			} else {
-				System.out.println("Deze dag(" + day
-						+ ") zit niet in de lijst. Het was namelijk: "
-						+ res2[DATE]);
-			}
+			} 
 		}
 
 		// Maak er nu een array van
@@ -377,7 +366,6 @@ public class Leaderboard implements Serializable {
 		try {
 			return sdf.parse(date);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -388,7 +376,6 @@ public class Leaderboard implements Serializable {
 		try {
 			return sdf.parse(time);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -457,7 +444,6 @@ public class Leaderboard implements Serializable {
 			 res += RolitConstants.msgDelim+naam+","+score+","+datumtijd.getTimeInMillis()+";";
 		}
 		return res;
-		// TODO Auto-generated method stub
 		
 	}
 }

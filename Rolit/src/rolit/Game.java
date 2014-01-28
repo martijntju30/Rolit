@@ -17,58 +17,39 @@ import clientEnServer.RolitControl;
  */
 public class Game extends Observable {
 
-	// -- Instance variables -----------------------------------------
-
 	public int NUMBER_PLAYERS = 0;
-
-	/*
-	 * @ private invariant board != null;
-	 */
-	/**
-	 * The board.
-	 */
-	private Board board;
+	private Board board;/* @ private invariant board != null; */
 	public Rolit_view view;
-
-	/*
-	 * @ private invariant players.length == NUMBER_PLAYERS; private (\forall
-	 * int i; 0 <= i && i < NUMBER_PLAYERS; players[i] != null);
-	 */
-	/**
-	 * The 2 players of the game.
-	 */
 	private Player[] players;
 	private int[] score;
-
 	private Leaderboard leaderboard;
-
-	/*
-	 * @ private invariant 0 <= current && current < NUMBER_PLAYERS;
-	 */
-	/**
-	 * Index of the current player.
-	 */
 	private int current;
-
 	private Client client;
 
-	// -- Constructors -----------------------------------------------
-	/*
-	 * @ requires s0 != null; requires s1 != null;
-	 */
 	/**
-	 * Creates a new Game object.
+	 * Maakt een game-object
 	 * 
 	 * @param s0
-	 *            the first player
+	 *            speler 1
 	 * @param s1
-	 *            the second player
+	 *            speler 2
+	 * @param s2
+	 *            speler 3
+	 * @param s3
+	 *            speler 4
+	 * @param client
+	 *            de client die deze game heeft gestart. null, dan is het de
+	 *            server
+	 * @param leaderboard
+	 *            Het leaderboard waar deze game mee moet communiceren.
 	 */
 	public Game(Player s0, Player s1, Player s2, Player s3, Client client,
 			Leaderboard leaderboard) {
 		this.client = client;
 		this.leaderboard = leaderboard;
 		board = new Board();
+
+		// Kijk hoeveel spelers er zijn
 		if (s0 != null && !s0.getName().equals("null")) {
 			NUMBER_PLAYERS++;
 		}
@@ -82,53 +63,29 @@ public class Game extends Observable {
 			NUMBER_PLAYERS++;
 		}
 
+		// Initialiseer de spelers
 		players = new Player[NUMBER_PLAYERS];
 		score = new int[NUMBER_PLAYERS];
 		if (s0 != null && !s0.getName().equals("null")) {
-//			if (s0.getName().startsWith("ai_")){
-//				players[0] = new SmartStrategy(s0.getName(), s0.getBall());
-//				this.addObserver((SmartStrategy) players[0]);
-//			}
-//			else {
-				players[0] = s0;
-//			}
+			players[0] = s0;
 		}
 		if (s1 != null && !s1.getName().equals("null")) {
-//			if (s1.getName().startsWith("ai_")){
-//				players[1] = new SmartStrategy(s1.getName(), s1.getBall());
-//				this.addObserver((SmartStrategy) players[1]);
-//			}
-//			else {
-				players[1] = s1;
-//			}
+			players[1] = s1;
 		}
 		if (s2 != null && !s2.getName().equals("null")) {
-//			if (s2.getName().startsWith("ai_")){
-//				players[2] = new SmartStrategy(s2.getName(), s2.getBall());
-//				this.addObserver((SmartStrategy) players[2]);
-//			}
-//			else {
-				players[2] = s2;
-//			}
+			players[2] = s2;
 		}
 		if (s3 != null && !s3.getName().equals("null")) {
-//			if (s3.getName().startsWith("ai_")){
-//				players[3] = new SmartStrategy(s3.getName(), s3.getBall());
-//				this.addObserver((SmartStrategy) players[3]);
-//			}
-//			else {
-				players[3] = s3;
-//			}
+			players[3] = s3;
 		}
 
+		// Zet de eerste speler aan de beurt.
 		current = 0;
-		//if (client != null) {
-			view = new Rolit_view(this, client);
-		//}
+		// Maak een view voor deze game.
+		view = new Rolit_view(this, client);
+		// Update het gameveld.
 		update();
 	}
-
-	// -- Commands ---------------------------------------------------
 
 	/**
 	 * Starts the Tic Tac Toe game. <br>
@@ -170,15 +127,13 @@ public class Game extends Observable {
 	}
 
 	/**
-	 * Resets the game. <br>
-	 * The board is emptied and player[0] becomes the current player.
+	 * Resets het spel. Het bord wordt geleegd en speler 0 mag weer beginnen.
 	 */
 	protected void reset() {
 		current = 0;
 		board.reset();
 	}
 
-	// B{Spel.play}
 	/**
 	 * Plays the Tic Tac Toe game. <br>
 	 * First the (still empty) board is shown. Then the game is played until it
@@ -186,7 +141,6 @@ public class Game extends Observable {
 	 * the changed game situation is printed.
 	 */
 	private void play() {
-		// E{Spel}
 		update();
 		while (!board.gameOver()) {
 			players[current].makeMove(board, this);
@@ -194,33 +148,27 @@ public class Game extends Observable {
 			update();
 		}
 		printResult();
-		// B{Spel}
-		// I{Spel} // [BODY-NOG-TOE-TE-VOEGEN]
 	}
-
-	protected void nextPlayer() {
-		current = (current + 1) % NUMBER_PLAYERS;
-		//this.setChanged();
-		//this.notifyObservers(current+"");
-	}
-
-	// E{Spel.play}
 
 	/**
-	 * Prints the game situation.
+	 * Zeg dat de volgende speler aan de beurt is.
+	 */
+	protected void nextPlayer() {
+		current = (current + 1) % NUMBER_PLAYERS;
+	}
+
+	/**
+	 * Notify de observers zodat de view wordt aangepast.
 	 */
 	public void update() {
 		this.setChanged();
 		this.notifyObservers();
 	}
 
-	/*
-	 * @ requires this.board.gameOver();
-	 */
-
 	/**
-	 * Prints the result of the last game. <br>
+	 * Geeft het resultaat van het spel.
 	 */
+	// @ requires this.board.gameOver();
 	private void printResult() {
 		if (board.hasWinner()) {
 			int playernum = 0;
@@ -241,8 +189,8 @@ public class Game extends Observable {
 			view.label.setText("Draw. There is no winner!");
 			view.repaint();
 		}
+		// De server gaat nu regelen dat de highscores worden toegevoegd.
 		if (client == null) {
-			System.out.println("De server zal nu de scores aan de highscore toevoegen");
 			for (int i = 0; i < NUMBER_PLAYERS; i++) {
 				leaderboard.add(players[i].getName(),
 						board.countBalls(players[i].getBall()));
@@ -250,18 +198,33 @@ public class Game extends Observable {
 				leaderboard.showBoard();
 			}
 			view.invalidate();
-			System.out.println("De server is klaar");
 		}
 	}
 
+	/**
+	 * Geeft het echte bord terug. Geen kopie.
+	 * 
+	 * @return het bord.
+	 */
 	public Board getBoard() {
 		return board;
 	}
 
+	/**
+	 * Geeft de huidige speler terug.
+	 * 
+	 * @return de speler die aan de beurt is.
+	 */
 	public Player getCurrentPlayer() {
 		return players[current];
 	}
 
+	/**
+	 * Zorgt ervoor dat de regels worden toegepast zodra er een zet wordt
+	 * gedaan. Hier gaat het vooral om het overnemen van andere ballen.
+	 * 
+	 * @param zet de zet die gedaan is.
+	 */
 	private void applyRules(int zet) {
 		Set<Integer> toChange = Validatie.getPossibleTakeOvers(zet, board,
 				getCurrentPlayer());
@@ -272,6 +235,10 @@ public class Game extends Observable {
 		}
 	}
 
+	/**
+	 * Voer je beurt uit.
+	 * @param i de zet die je wil doen.
+	 */
 	public void takeTurn(int i) {
 		takeTurn(i, false);
 	}
@@ -318,29 +285,39 @@ public class Game extends Observable {
 		}
 	}
 
+	/**
+	 * Geeft een kopie van het bord.
+	 * @return kopie van het bord.
+	 */
 	public Board getBoardCopy() {
 		return board.deepCopy();
 	}
 
-
-	public String getWinner(){
+	/**
+	 * Geeft de winnaar terug als die er is.
+	 * @return de winnaar als die er is.
+	 */
+	public String getWinner() {
 		return getWinner(false);
 	}
+
 	public String getWinner(boolean vroegtijdigEinde) {
-		for (Player p:players){
-				if (board.isWinner(p.getBall(), vroegtijdigEinde))
-					return p.getName();
-			}
+		for (Player p : players) {
+			if (board.isWinner(p.getBall(), vroegtijdigEinde))
+				return p.getName();
+		}
 		return null;
 	}
 
+	/**
+	 * Zorgt ervoor dat de game wordt gestopt en de view wordt verwijderd.
+	 */
 	public void endGame() {
 		view.dispose();
 		this.deleteObservers();
 		try {
 			this.finalize();
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
